@@ -1,0 +1,557 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard - Online Bus Pass Generation And Renewal{% endblock %}
+
+{% block content %}
+{% if is_admin %}
+<!-- Top Stats -->
+<div class="top-cards mb-2">
+    <div class="stat-card">
+        <h3>Pending</h3>
+        <div class="num">{{ pending_count }}</div>
+    </div>
+    <div class="stat-card">
+        <h3>Active Passes</h3>
+        <div class="num">{{ active_passes }}</div>
+    </div>
+    <div class="stat-card">
+        <h3>Total Revenue</h3>
+        <div class="num" style="color: var(--success);">₹{{ total_revenue }}</div>
+    </div>
+</div>
+
+<!-- Student vs Public Breakdown -->
+<div class="top-cards mb-2">
+    <div class="stat-card" style="border-left: 3px solid #818cf8;">
+        <h3>🎓 Student Passes</h3>
+        <div class="num">{{ student_passes }}</div>
+        <small style="color: var(--text-muted);">Active: {{ active_student }} | Revenue: ₹{{ student_revenue }}</small>
+    </div>
+    <div class="stat-card" style="border-left: 3px solid #10b981;">
+        <h3>👤 Public Passes</h3>
+        <div class="num">{{ public_passes }}</div>
+        <small style="color: var(--text-muted);">Active: {{ active_public }} | Revenue: ₹{{ public_revenue }}</small>
+    </div>
+</div>
+
+<!-- Tab Menu -->
+<div class="admin-tabs-wrapper mt-2">
+    <div class="admin-tab-nav">
+        <button class="admin-tab-btn active" onclick="switchTab(event, 'tab-pending-student')" id="btn-pending-student">
+            🎓 Pending Student
+            {% if pending_student_passes %}
+            <span class="tab-badge">{{ pending_student_passes|length }}</span>
+            {% endif %}
+        </button>
+        <button class="admin-tab-btn" onclick="switchTab(event, 'tab-pending-public')" id="btn-pending-public">
+            👤 Pending Public
+            {% if pending_public_passes %}
+            <span class="tab-badge">{{ pending_public_passes|length }}</span>
+            {% endif %}
+        </button>
+        <button class="admin-tab-btn" onclick="switchTab(event, 'tab-student-users')" id="btn-student-users">
+            🎓 Student Users
+        </button>
+        <button class="admin-tab-btn" onclick="switchTab(event, 'tab-public-users')" id="btn-public-users">
+            👤 Public Users
+        </button>
+        <button class="admin-tab-btn" onclick="switchTab(event, 'tab-all-passes')" id="btn-all-passes">
+            🎫 All Passes
+        </button>
+        <button class="admin-tab-btn" onclick="switchTab(event, 'tab-usage-logs')" id="btn-usage-logs">
+            📋 Usage Logs
+        </button>
+    </div>
+
+    <!-- Tab: Pending Student Applications -->
+    <div class="admin-tab-panel" id="tab-pending-student">
+        <h3 class="tab-section-title">🎓 Pending Student Applications</h3>
+        {% if pending_student_passes %}
+        <div class="glass-card mt-2 mb-2" style="padding: 1.5rem;">
+            <table class="glass-table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>College</th>
+                        <th>Route</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in pending_student_passes %}
+                    <tr>
+                        <td><strong>{{ p.user.get_full_name|default:p.user.username }}</strong></td>
+                        <td>{{ p.user.college|default:"-" }}</td>
+                        <td>{{ p.user.route|default:"-" }}</td>
+                        <td>
+                            <div class="action-btns">
+                                <form action="{% url 'approve_pass' p.pk %}" method="post" style="display:inline;">
+                                    {% csrf_token %}
+                                    <button name="action" value="approve" class="btn btn-success btn-small">Approve</button>
+                                    <button name="action" value="reject" class="btn btn-danger btn-small">Reject</button>
+                                </form>
+                                <a href="{% url 'delete_pass' p.pk %}" class="btn bg-danger-soft btn-small" onclick="return confirm('Drop this application?')">Drop</a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="glass-card text-center mt-2" style="padding: 2.5rem;">
+            <p style="color: var(--text-muted); font-size: 1.05rem;">✅ No pending student applications.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Tab: Pending Public Applications -->
+    <div class="admin-tab-panel" id="tab-pending-public">
+        <h3 class="tab-section-title">👤 Pending Public Applications</h3>
+        {% if pending_public_passes %}
+        <div class="glass-card mt-2 mb-2" style="padding: 1.5rem;">
+            <table class="glass-table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Address</th>
+                        <th>Route</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in pending_public_passes %}
+                    <tr>
+                        <td><strong>{{ p.user.get_full_name|default:p.user.username }}</strong></td>
+                        <td>{{ p.user.address|default:"-"|truncatewords:5 }}</td>
+                        <td>{{ p.user.route|default:"-" }}</td>
+                        <td>
+                            <div class="action-btns">
+                                <form action="{% url 'approve_pass' p.pk %}" method="post" style="display:inline;">
+                                    {% csrf_token %}
+                                    <button name="action" value="approve" class="btn btn-success btn-small">Approve</button>
+                                    <button name="action" value="reject" class="btn btn-danger btn-small">Reject</button>
+                                </form>
+                                <a href="{% url 'delete_pass' p.pk %}" class="btn bg-danger-soft btn-small" onclick="return confirm('Drop this application?')">Drop</a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="glass-card text-center mt-2" style="padding: 2.5rem;">
+            <p style="color: var(--text-muted); font-size: 1.05rem;">✅ No pending public applications.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Tab: Student Users -->
+    <div class="admin-tab-panel" id="tab-student-users">
+        <div class="flex-between" style="align-items: flex-end;">
+            <h3 class="tab-section-title">🎓 Student Users</h3>
+            <div class="admin-search-wrapper" style="min-width: 360px;">
+                <form method="get" style="display: flex !important; flex-direction: row !important; align-items: center !important; gap: 8px !important; margin: 0 !important;">
+                    <input type="text" name="q_student" placeholder="Search students..." 
+                           style="flex: 1 !important; width: 0 !important; min-width: 150px !important; padding: 8px 12px !important; border-radius: 8px !important; background: rgba(255,255,255,0.08) !important; border: 1px solid rgba(255,255,255,0.1) !important; color: white !important;"
+                           value="{{ q_student }}">
+                    <button type="submit" class="search-action-btn btn-primary" style="width: 40px !important; height: 40px !important; flex-shrink: 0 !important; display: flex !important; align-items: center !important; justify-content: center !important; border-radius: 8px !important;" title="Search">
+                        <i class="fas fa-search"></i>
+                    </button>
+                    {% if q_student %}
+                    <a href="{% url 'dashboard' %}?active_tab=tab-student-users" class="search-action-btn btn-clear-icon" style="width: 40px !important; height: 40px !important; flex-shrink: 0 !important; display: flex !important; align-items: center !important; justify-content: center !important; border-radius: 8px !important;" title="Clear">
+                        <i class="fas fa-times"></i>
+                    </a>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+        <div class="glass-card mt-2" style="padding: 1.5rem;">
+            <table class="glass-table">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Full Name</th>
+                        <th>College</th>
+                        <th>Route</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in student_users %}
+                    <tr>
+                        <td>{{ u.username }}</td>
+                        <td>{{ u.get_full_name|default:"-" }}</td>
+                        <td>{{ u.college|default:"-" }}</td>
+                        <td>{{ u.route|default:"-" }}</td>
+                        <td>
+                            <div class="action-btns">
+                                <a href="{% url 'edit_user' u.pk %}" class="btn bg-info-soft btn-small">Edit</a>
+                                <a href="{% url 'delete_user' u.pk %}" class="btn bg-danger-soft btn-small" onclick="return confirm('Are you sure you want to drop this user?')">Drop</a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" class="text-center">No student users found</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Tab: Public Users -->
+    <div class="admin-tab-panel" id="tab-public-users">
+        <div class="flex-between" style="align-items: flex-end;">
+            <h3 class="tab-section-title">👤 Public Users</h3>
+            <div class="admin-search-wrapper" style="min-width: 360px;">
+                <form method="get" style="display: flex !important; flex-direction: row !important; align-items: center !important; gap: 8px !important; margin: 0 !important;">
+                    <input type="text" name="q_public" placeholder="Search public users..." 
+                           style="flex: 1 !important; width: 0 !important; min-width: 150px !important; padding: 8px 12px !important; border-radius: 8px !important; background: rgba(255,255,255,0.08) !important; border: 1px solid rgba(255,255,255,0.1) !important; color: white !important;"
+                           value="{{ q_public }}">
+                    <button type="submit" class="search-action-btn btn-primary" style="width: 40px !important; height: 40px !important; flex-shrink: 0 !important; display: flex !important; align-items: center !important; justify-content: center !important; border-radius: 8px !important;" title="Search">
+                        <i class="fas fa-search"></i>
+                    </button>
+                    {% if q_public %}
+                    <a href="{% url 'dashboard' %}?active_tab=tab-public-users" class="search-action-btn btn-clear-icon" style="width: 40px !important; height: 40px !important; flex-shrink: 0 !important; display: flex !important; align-items: center !important; justify-content: center !important; border-radius: 8px !important;" title="Clear">
+                        <i class="fas fa-times"></i>
+                    </a>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+        <div class="glass-card mt-2" style="padding: 1.5rem;">
+            <table class="glass-table">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Full Name</th>
+                        <th>Route</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in public_users %}
+                    <tr>
+                        <td>{{ u.username }}</td>
+                        <td>{{ u.get_full_name|default:"-" }}</td>
+                        <td>{{ u.route|default:"-" }}</td>
+                        <td>
+                            <div class="action-btns">
+                                <a href="{% url 'edit_user' u.pk %}" class="btn bg-info-soft btn-small">Edit</a>
+                                <a href="{% url 'delete_user' u.pk %}" class="btn bg-danger-soft btn-small" onclick="return confirm('Are you sure you want to drop this user?')">Drop</a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="4" class="text-center">No public users found</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Tab: All Passes -->
+    <div class="admin-tab-panel" id="tab-all-passes">
+        <div class="flex-between" style="align-items: flex-end;">
+            <h3 class="tab-section-title">🎫 All Issued Passes</h3>
+            <div class="admin-search-wrapper" style="min-width: 360px;">
+                <form method="get" style="display: flex !important; flex-direction: row !important; align-items: center !important; gap: 8px !important; margin: 0 !important;">
+                    <input type="text" name="q_pass" placeholder="Search by Pass ID or User..." 
+                           style="flex: 1 !important; width: 0 !important; min-width: 150px !important; padding: 8px 12px !important; border-radius: 8px !important; background: rgba(255,255,255,0.08) !important; border: 1px solid rgba(255,255,255,0.1) !important; color: white !important;"
+                           value="{{ q_pass }}">
+                    <button type="submit" class="search-action-btn btn-primary" style="width: 40px !important; height: 40px !important; flex-shrink: 0 !important; display: flex !important; align-items: center !important; justify-content: center !important; border-radius: 8px !important;" title="Search">
+                        <i class="fas fa-search"></i>
+                    </button>
+                    {% if q_pass %}
+                    <a href="{% url 'dashboard' %}?active_tab=tab-all-passes" class="search-action-btn btn-clear-icon" style="width: 40px !important; height: 40px !important; flex-shrink: 0 !important; display: flex !important; align-items: center !important; justify-content: center !important; border-radius: 8px !important;" title="Clear">
+                        <i class="fas fa-times"></i>
+                    </a>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+        <div class="glass-card mt-2" style="padding: 1.5rem;">
+            <table class="glass-table">
+                <thead>
+                    <tr>
+                        <th>Pass ID</th>
+                        <th>User</th>
+                        <th>Status</th>
+                        <th>Expiry</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in all_passes %}
+                    <tr>
+                        <td><strong>{{ p.main_pass_id }}</strong></td>
+                        <td>{{ p.user.username }}</td>
+                        <td><span class="badge badge-{{ p.status|lower }}">{{ p.status }}</span></td>
+                        <td>{{ p.expiry_date|date:"M d, Y" }}</td>
+                        <td>
+                            <div class="action-btns">
+                                <a href="{% url 'edit_pass' p.pk %}" class="btn bg-info-soft btn-small">Edit</a>
+                                <a href="{% url 'delete_pass' p.pk %}" class="btn bg-danger-soft btn-small" onclick="return confirm('Permanently delete this pass?')">Drop</a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" class="text-center">No issued passes found</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Tab: Usage Logs -->
+    <div class="admin-tab-panel" id="tab-usage-logs">
+        <h3 class="tab-section-title">📋 Recent Usage Logs</h3>
+        <div class="glass-card mt-2" style="padding: 1.2rem;">
+            <table class="glass-table" style="font-size: 0.85rem;">
+                <thead>
+                    <tr>
+                        <th>Pass ID</th>
+                        <th>Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in recent_logs %}
+                    <tr>
+                        <td>{{ log.main_pass.main_pass_id }}</td>
+                        <td style="color: var(--text-muted);">{{ log.scan_time|date:"H:i" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="2" class="text-center">No logs yet</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+.admin-tabs-wrapper {
+    background: var(--glass-bg, rgba(255,255,255,0.04));
+    border: 1px solid var(--glass-border, rgba(255,255,255,0.08));
+    border-radius: 16px;
+    overflow: hidden;
+}
+.admin-tab-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0;
+    background: rgba(255,255,255,0.03);
+    border-bottom: 1px solid var(--glass-border, rgba(255,255,255,0.08));
+    padding: 0.5rem 0.75rem;
+    gap: 0.4rem;
+}
+.admin-tab-btn {
+    background: transparent;
+    border: 1px solid transparent;
+    color: #ffffff;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    padding: 0.55rem 1.1rem;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 0.88rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    position: relative;
+}
+.admin-tab-btn:hover {
+    background: rgba(255,255,255,0.06);
+    color: var(--text, #e6e6e6);
+}
+.admin-tab-btn.active {
+    background: linear-gradient(135deg, rgba(129,140,248,0.25), rgba(16,185,129,0.15));
+    border-color: rgba(129,140,248,0.4);
+    color: #c4b5fd;
+    font-weight: 600;
+}
+.tab-badge {
+    background: #f43f5e;
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    border-radius: 99px;
+    padding: 0.1rem 0.42rem;
+    min-width: 18px;
+    text-align: center;
+    line-height: 1.4;
+}
+.admin-tab-panel {
+    display: none;
+    padding: 1.5rem;
+    animation: fadeTabIn 0.2s ease;
+}
+.admin-tab-panel.active {
+    display: block;
+}
+.tab-section-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #ffffff;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.6);
+    margin-bottom: 0.25rem;
+}
+@keyframes fadeTabIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+</style>
+
+<script>
+function switchTab(event, tabId) {
+    document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.admin-tab-panel').forEach(p => p.classList.remove('active'));
+    
+    if(event) {
+        event.currentTarget.classList.add('active');
+    } else {
+        // Find button by target tabId
+        const btnId = tabId.replace('tab-', 'btn-');
+        const btn = document.getElementById(btnId);
+        if(btn) btn.classList.add('active');
+    }
+    
+    document.getElementById(tabId).classList.add('active');
+}
+
+// Handle reload active tab
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const forceTab = urlParams.get('active_tab');
+    const activeTabId = forceTab || "{{ active_tab|default:'tab-pending-student' }}";
+    switchTab(null, activeTabId);
+});
+</script>
+
+{% endif %}
+
+
+
+
+{% if not is_admin %}
+<hr style="margin: 3rem 0; border-color: var(--glass-border);">
+
+<div class="flex-between mb-2">
+    <h2>My Bus Passes</h2>
+    <div style="display: flex; gap: 0.5rem;">
+        <a href="{% url 'renew_search' %}" class="btn btn-outline">Renewal</a>
+        {% if not passes %}
+        <a href="{% url 'apply_pass' %}" class="btn btn-primary">+ Apply Fresh Pass</a>
+        {% endif %}
+    </div>
+</div>
+
+{% if passes %}
+<div class="glass-card" style="padding: 1.5rem;">
+    <table class="glass-table">
+        <thead>
+            <tr>
+                <th>Pass ID</th>
+                <th>Type</th>
+                <th>Issue Date</th>
+                <th>Expiry Date</th>
+                <th>Status</th>
+                <th>Valid Until</th>
+                <th>Daily Usage</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in passes %}
+            <tr>
+                <td>{{ p.main_pass_id|default:"(Pending)" }}</td>
+                <td>{{ p.pass_type }}</td>
+                <td>{{ p.issue_date|date:"M d, Y" }}</td>
+                <td>{{ p.expiry_date|date:"M d, Y" }}</td>
+                <td>
+                    {% if p.status == 'ACTIVE' %}
+                    {% if p.is_currently_valid %}
+                    <span class="badge badge-success">ACTIVE</span>
+                    {% else %}
+                    <span class="badge badge-warning">RENEWAL REQ</span>
+                    {% endif %}
+                    {% else %}
+                    <span class="badge badge-{{ p.status|lower }}">{{ p.status }}</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if p.current_valid_to %}
+                    <span
+                        style="color: {% if p.is_currently_valid %}var(--success){% else %}var(--danger){% endif %}; font-weight: 600;">
+                        {{ p.current_valid_to|date:"M d, Y" }}
+                    </span>
+                    {% else %}
+                    <span style="color: var(--text-muted);">No Renewal</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if p.status == 'ACTIVE' %}
+                    <strong style="color: var(--primary);">{{ p.daily_trip_count }}</strong>
+                    {% if p.pass_type == 'STUDENT' %}/ 2{% endif %}
+                    <br><small style="color: var(--text-muted);">{% if p.last_used_date %}{{ p.last_used_date|date:"M d" }}{% else %}Never{% endif %}</small>
+                    {% else %}
+                    -
+                    {% endif %}
+                </td>
+                <td>
+                    {% if p.status == 'ACTIVE' %}
+                    {% if p.payment_status != 'PAID' %}
+                    <a href="{% url 'pay_pass' p.pk %}" class="btn btn-primary"
+                        style="padding: 0.4rem 0.8rem; font-size:0.85rem;">Pay Initial Fee</a>
+                    {% else %}
+                    {# Check for pending monthly renewal #}
+                    {% with current_renewal=p.renewals.all.last %}
+                    {% if current_renewal and current_renewal.payment_status == 'PENDING' %}
+                    <a href="{% url 'pay_pass' p.pk %}" class="btn btn-warning"
+                        style="padding: 0.4rem 0.8rem; font-size:0.85rem;">Pay Monthly Fee</a>
+                    {% elif p.is_currently_valid %}
+                    <a href="{% url 'download_pass' p.pk %}" class="btn btn-success"
+                        style="padding: 0.4rem 0.8rem; font-size:0.85rem;">Scan QR / Download</a>
+                    {% endif %}
+                    {% endwith %}
+                    {% endif %}
+                    <a href="{% url 'renew_pass' p.pk %}" class="btn btn-outline"
+                        style="padding: 0.4rem 0.8rem; font-size:0.85rem;">Renew / Extend</a>
+
+                    {% if p.main_pass_id and p.payment_status == 'PAID' %}
+                    <a href="{% url 'download_id_card' p.pk %}" class="btn btn-info"
+                        style="padding: 0.4rem 0.8rem; font-size:0.85rem;">ID Card</a>
+                    {% endif %}
+                    {% elif p.status == 'PENDING' %}
+                    <span
+                        style="color: var(--primary); font-weight: 600; display: block; margin-bottom: 0.5rem;">Awaiting
+                        Admin Approval</span>
+                    {% elif p.status == 'BLOCKED' %}
+                    <span
+                        style="color: var(--danger); font-weight: 600; display: block; margin-bottom: 0.5rem;">Application
+                        Rejected</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="glass-card mt-2" style="padding: 1.5rem;">
+    <h3>Recent Renewals & Usage</h3>
+    <p style="color: var(--text-muted);">View your monthly renewals and usage history here.</p>
+</div>
+
+{% else %}
+<div class="glass-card text-center" style="padding: 3rem;">
+    <h3 style="color: var(--text-muted); margin-bottom: 1rem;">No passes found</h3>
+    <p>You haven't applied for any bus pass yet.</p>
+    <a href="{% url 'apply_pass' %}" class="btn btn-primary mt-2">Apply Now</a>
+</div>
+{% endif %}
+{% endif %}
+{% endblock %}

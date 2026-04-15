@@ -1,0 +1,34 @@
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from .models import Route
+from .forms import RouteForm
+
+@login_required
+def manage_routes(request):
+    if request.user.role != 'admin':
+        return redirect('dashboard')
+    routes = Route.objects.all()
+    return render(request, 'routes/manage.html', {'routes': routes})
+
+@login_required
+def add_route(request):
+    if request.user.role != 'admin':
+        return redirect('dashboard')
+    if request.method == 'POST':
+        form = RouteForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('manage_routes')
+    else:
+        form = RouteForm()
+    return render(request, 'routes/add.html', {'form': form})
+
+@login_required
+def delete_route(request, pk):
+    if request.user.role != 'admin':
+        return redirect('dashboard')
+    route = get_object_or_404(Route, pk=pk)
+    if request.method == 'POST':
+        route.delete()
+        return redirect('manage_routes')
+    return render(request, 'routes/confirm_delete.html', {'route': route})

@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}Delete Route - PassPro{% endblock %}
+
+{% block content %}
+<div class="max-w-md text-center">
+    <div class="glass-card">
+        <h2 style="color: var(--danger); margin-bottom: 1rem;">Confirm Deletion</h2>
+        <p class="mb-2">Are you sure you want to delete the route <strong>{{ route.route_name }}</strong>?</p>
+
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger" style="width: 100%; margin-bottom: 1rem;">Yes, Delete
+                Route</button>
+            <a href="{% url 'manage_routes' %}" class="btn btn-outline"
+                style="width: 100%; display:block; box-sizing:border-box;">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

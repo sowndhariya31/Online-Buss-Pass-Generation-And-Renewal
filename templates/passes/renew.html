@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}Renew Pass - PassPro{% endblock %}
+
+{% block content %}
+<div class="max-w-md">
+    <div class="glass-card">
+        <h2 class="text-center mb-2">Monthly Renewal</h2>
+        <p class="text-center" style="color: var(--text-muted); margin-bottom: 2rem;">
+            Renewing Pass: <strong>{{ main_pass.main_pass_id }}</strong>
+        </p>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label>Select Month</label>
+                <select name="month" required>
+                    {% for month in available_months %}
+                    <option value="{{ month }}">{{ month }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="stat-card mb-2">
+                <h3>Renewal Cost</h3>
+                <div class="num">
+                    {% if main_pass.pass_type == 'STUDENT' %}₹280{% else %}₹1000{% endif %}
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-success" style="width: 100%;">Proceed to Payment</button>
+        </form>
+
+        <a href="{% url 'dashboard' %}" class="btn btn-outline" style="width: 100%; margin-top: 1rem;">Cancel</a>
+    </div>
+</div>
+{% endblock %}

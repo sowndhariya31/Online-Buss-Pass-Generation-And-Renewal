@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Add Route - PassPro{% endblock %}
+
+{% block content %}
+<div class="max-w-md">
+    <div class="flex-between mb-2">
+        <h2>Add New Route</h2>
+        <a href="{% url 'manage_routes' %}" class="btn btn-outline" style="padding: 0.4rem 0.8rem;">Back</a>
+    </div>
+
+    <div class="glass-card">
+        <form method="post">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="form-group">
+                {{ field.label_tag }}
+                {{ field }}
+                {% if field.errors %}
+                <div style="color: var(--danger); font-size: 0.85rem; margin-top: 0.3rem;">
+                    {{ field.errors|striptags }}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary mt-2" style="width: 100%;">Save Route</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

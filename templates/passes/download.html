@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% block title %}Download Pass - PassPro{% endblock %}
+
+{% block content %}
+<div class="max-w-md">
+    <div class="glass-card" style="padding: 0; overflow: hidden; border: 2px solid var(--primary);">
+        <!-- Header -->
+        <div style="background: var(--primary); padding: 1.5rem; text-align: center;">
+            <h2 style="margin: 0; color: white;">Bus Pass ID Card</h2>
+            <p style="margin: 0.5rem 0 0 0; color: rgba(255,255,255,0.8); font-size: 0.9rem;">
+                MTC - Public Transport
+            </p>
+        </div>
+
+        <!-- Body -->
+        <div style="padding: 2rem; text-align: center;">
+            {% if user.photo %}
+            <img src="{{ user.photo.url }}" alt="Photo"
+                style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 4px solid var(--glass-border); margin-bottom: 1rem;">
+            {% else %}
+            <div
+                style="width: 100px; height: 100px; border-radius: 50%; background: var(--glass-bg); margin: 0 auto 1rem auto; display: flex; align-items: center; justify-content: center; font-size: 2rem;">
+                👤</div>
+            {% endif %}
+
+            <h3 style="margin: 0; font-size: 1.5rem;">{{ user.get_full_name|default:user.username }}</h3>
+            
+            <div style="background: rgba(0,0,0,0.05); border-radius: 8px; padding: 0.8rem; margin: 1rem 0;">
+                <p style="margin: 0; font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;">Permanent Pass ID</p>
+                <p style="margin: 0.2rem 0; font-weight: 800; font-size: 1.1rem; font-family: monospace;">{{ main_pass.main_pass_id }}</p>
+            </div>
+            
+            <div style="background: rgba(99, 102, 241, 0.1); border-radius: 8px; padding: 0.8rem; margin: 1rem 0; border: 1px solid rgba(99, 102, 241, 0.3);">
+                <p style="margin: 0; font-size: 0.7rem; color: var(--primary); text-transform: uppercase; font-weight: bold;">Active QR Code ID</p>
+                <p style="margin: 0.2rem 0; color: var(--primary); font-weight: 800; font-size: 1.2rem; font-family: monospace;">
+                    {{ active_id }}
+                </p>
+            </div>
+
+            <div class="flex-between" style="margin: 1.5rem 0; font-size: 0.9rem; text-align: left;">
+                <div>
+                    <span style="color: var(--text-muted); display: block;">ROLE</span>
+                    <strong>{{ main_pass.pass_type }}</strong>
+                </div>
+                <div>
+                    <span style="color: var(--text-muted); display: block;">EXPIRY</span>
+                    <strong>{{ main_pass.expiry_date|date:"M Y" }}</strong>
+                </div>
+            </div>
+
+            <div
+                style="background: white; padding: 1rem; border-radius: 12px; display: inline-block; margin-top: 1rem;">
+                <img src="{{ qr_code }}" alt="QR Code" style="width: 200px; height: 200px;">
+            </div>
+
+            <p style="margin-top: 1.5rem; font-size: 0.8rem; color: var(--text-muted);">
+                Scan this QR code during travel for validation.
+            </p>
+        </div>
+
+        <!-- Footer -->
+        <div
+            style="background: rgba(0,0,0,0.2); padding: 1rem; text-align: center; border-top: 1px solid var(--glass-border);">
+            <button onclick="window.print()" class="btn btn-outline" style="width: 100%;">Print Pass / Save as
+                PDF</button>
+        </div>
+    </div>
+
+    <div class="text-center mt-2">
+        <a href="{% url 'dashboard' %}" style="color: var(--text-muted); text-decoration: none;">← Back to Dashboard</a>
+    </div>
+</div>
+
+<style>
+    @media print {
+        body {
+            background: white !important;
+        }
+
+        .glass-nav,
+        .btn,
+        .text-center {
+            display: none !important;
+        }
+
+        .glass-card {
+            box-shadow: none !important;
+            border: 2px solid black !important;
+            margin: 0 auto !important;
+        }
+
+        .container {
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Online Bus Pass Generation And Renewal - Digital Bus Pass Management{% endblock %}
+
+{% block content %}
+<div style="text-align: center; padding: 4rem 0;">
+    <h1
+        style="font-size: 4.5rem; font-weight: 800; margin-bottom: 1.5rem; background: linear-gradient(to right, #818cf8, #c084fc); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">
+        Travel Smarter.
+    </h1>
+    <p
+        style="font-size: 1.4rem; color: var(--text-muted); max-width: 700px; margin: 0 auto 3rem auto; line-height: 1.6;">
+        The complete digital bus pass solution for Students and Public commuters.
+        Apply, renew, and travel with just a QR code.
+    </p>
+
+    <div style="display: flex; gap: 1.5rem; justify-content: center; margin-bottom: 5rem;">
+        <a href="{% url 'register' %}" class="btn btn-primary"
+            style="padding: 1.2rem 3rem; font-size: 1.2rem; border-radius: 50px;">Get Started Now</a>
+        <a href="{% url 'login' %}" class="btn btn-outline"
+            style="padding: 1.2rem 3rem; font-size: 1.2rem; border-radius: 50px;">Login to Account</a>
+    </div>
+
+    <div class="top-cards" style="margin-top: 2rem;">
+        <div class="glass-card" style="padding: 2rem;">
+            <div style="font-size: 2.5rem; margin-bottom: 1rem;">🎓</div>
+            <h3>Student Pass</h3>
+            <p style="color: var(--text-muted);">Yearly validity for only ₹280. Perfect for daily college travels.</p>
+        </div>
+        <div class="glass-card" style="padding: 2rem;">
+            <div style="font-size: 2.5rem; margin-bottom: 1rem;">🧑</div>
+            <h3>Public Pass</h3>
+            <p style="color: var(--text-muted);">Unlimited monthly travel for ₹1000. No daily limits, just pure freedom.
+            </p>
+        </div>
+        <div class="glass-card" style="padding: 2rem;">
+            <div style="font-size: 2.5rem; margin-bottom: 1rem;">📱</div>
+            <h3>QR Scan</h3>
+            <p style="color: var(--text-muted);">No more paper cards. Show your QR code to the conductor and you're good
+                to go.</p>
+        </div>
+    </div>
+</div>
+
+<footer
+    style="margin-top: 5rem; padding: 2rem; border-top: 1px solid var(--glass-border); text-align: center; color: var(--text-muted);">
+    <p>&copy; 2026 Online Bus Pass Generation And Renewal Management System. All rights reserved.</p>
+</footer>
+{% endblock %}

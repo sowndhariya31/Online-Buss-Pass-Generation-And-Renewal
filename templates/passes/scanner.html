@@ -1,0 +1,257 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Conductor Scanner - Online Bus Pass Generation And Renewal{% endblock %}
+
+{% block content %}
+<div class="max-w-md">
+    <div class="glass-card text-center">
+        <h2 class="mb-2" style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+            <img src="{% static 'images/logo.jpeg' %}" alt="Logo" style="height: 40px; width: auto; border-radius: 5px;">
+            Conductor Scanner
+        </h2>
+        <p style="color: var(--text-muted); margin-bottom: 2rem;">Scan QR or Enter Pass ID to validate travel.</p>
+
+        <div id="scanner-input">
+            <!-- Camera Scanner Area -->
+            <div id="qr-reader" style="width: 100%; max-width: 400px; margin: 0 auto 1.5rem auto; border-radius: 12px; overflow: hidden; border: 2px solid rgba(129, 140, 248, 0.3); min-height: 200px;"></div>
+
+            <!-- Camera status message -->
+            <div id="camera-status" style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem; min-height: 1.5rem;"></div>
+
+            <div style="display: flex; align-items: center; justify-content: center; margin: 1rem 0;">
+                <div style="flex: 1; height: 1px; background: rgba(129, 140, 248, 0.2);"></div>
+                <div style="padding: 0 1rem; color: var(--text-muted); font-size: 0.9rem; text-transform: uppercase;">or manually enter</div>
+                <div style="flex: 1; height: 1px; background: rgba(129, 140, 248, 0.2);"></div>
+            </div>
+
+            <div class="form-group">
+                <input type="text" id="pass_id_input" placeholder="REN2026-000001"
+                    style="text-align: center; font-size: 1.2rem; letter-spacing: 2px;">
+            </div>
+            <button onclick="validatePass()" class="btn btn-primary" style="width: 100%; border-radius: 50px;">Validate Pass</button>
+        </div>
+
+        <!-- Result Section -->
+        <div id="scan-result"
+            style="display: none; margin-top: 2rem; padding: 2rem; border-radius: 16px; animation: fadeIn 0.4s ease-out;">
+            <div id="result-icon" style="font-size: 4rem; margin-bottom: 1rem;"></div>
+            <h2 id="result-title"></h2>
+            <p id="result-message" style="margin: 1rem 0; font-size: 1.1rem;"></p>
+            <div id="result-details"
+                style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px; font-size: 0.9rem; text-align: left; margin-bottom: 1.5rem;">
+            </div>
+            <button onclick="resetScanner()" class="btn btn-outline" style="width: 100%;">Scan Next</button>
+        </div>
+    </div>
+</div>
+
+<!-- Include html5-qrcode library for camera scanning -->
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js" type="text/javascript"></script>
+
+<script>
+    let html5QrCode = null;
+    let isScannerRunning = false;
+    let scannerReady = false;
+
+    // Wait for library to load
+    function waitForLibrary(callback, retries = 20) {
+        if (typeof Html5Qrcode !== 'undefined') {
+            scannerReady = true;
+            callback();
+        } else if (retries > 0) {
+            setTimeout(() => waitForLibrary(callback, retries - 1), 300);
+        } else {
+            setCameraStatus("⚠️ QR library failed to load. Use manual entry.", "var(--danger)");
+        }
+    }
+
+    function setCameraStatus(msg, color) {
+        const el = document.getElementById('camera-status');
+        if (el) { el.innerText = msg; el.style.color = color || 'var(--text-muted)'; }
+    }
+
+    // Initialize the QR scanner when the page loads
+    document.addEventListener("DOMContentLoaded", function () {
+        setCameraStatus("⏳ Loading camera library...", "var(--text-muted)");
+        waitForLibrary(() => {
+            startScanner();
+        });
+    });
+
+    function startScanner() {
+        if (isScannerRunning) return;
+
+        // Always destroy and recreate the element to get a clean state
+        const container = document.getElementById('qr-reader');
+        container.innerHTML = '';
+
+        try {
+            html5QrCode = new Html5Qrcode("qr-reader");
+        } catch (e) {
+            setCameraStatus("⚠️ Could not initialize camera. Use manual entry.", "var(--danger)");
+            return;
+        }
+
+        setCameraStatus("📷 Starting camera...", "var(--text-muted)");
+
+        // Try back camera first, then fallback to any available camera
+        Html5Qrcode.getCameras().then(devices => {
+            if (!devices || devices.length === 0) {
+                setCameraStatus("⚠️ No camera found. Use manual entry.", "orange");
+                return;
+            }
+
+            // Prefer back/environment camera
+            let cameraId = devices[0].id;
+            for (const d of devices) {
+                const label = (d.label || '').toLowerCase();
+                if (label.includes('back') || label.includes('rear') || label.includes('environment')) {
+                    cameraId = d.id;
+                    break;
+                }
+            }
+
+            const config = { 
+                fps: 25, 
+                qrbox: (viewfinderWidth, viewfinderHeight) => {
+                    // Larger, responsive qrbox for better omnidirectional detection
+                    const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+                    const qrboxSize = Math.floor(minEdge * 0.8);
+                    return { width: qrboxSize, height: qrboxSize };
+                },
+                experimentalFeatures: {
+                    useBarCodeDetectorIfSupported: true
+                },
+                aspectRatio: 1.0,
+                formatsToSupport: [ Html5QrcodeSupportedFormats.QR_CODE ]
+            };
+
+            html5QrCode.start(
+                cameraId,
+                config,
+                onScanSuccess,
+                onScanFailure
+            ).then(() => {
+                isScannerRunning = true;
+                setCameraStatus("✅ Camera active. Point at QR code.", "var(--success)");
+            }).catch((err) => {
+                isScannerRunning = false;
+                console.error("Camera start error:", err);
+                let msg = "⚠️ Camera access denied. Use manual entry.";
+                if (err && err.toString().includes('NotAllowedError')) {
+                    msg = "🔒 Camera permission denied. Please allow camera access.";
+                } else if (err && err.toString().includes('NotFoundError')) {
+                    msg = "⚠️ No camera found. Use manual entry.";
+                }
+                setCameraStatus(msg, "orange");
+                document.getElementById('qr-reader').innerHTML = `
+                    <div style="padding: 2rem; color: orange; font-size: 0.95rem;">
+                        ${msg}
+                    </div>`;
+            });
+
+        }).catch(err => {
+            console.error("getCameras error:", err);
+            setCameraStatus("⚠️ Cannot access camera. Use manual entry.", "orange");
+        });
+    }
+
+    function onScanSuccess(decodedText, decodedResult) {
+        if (!isScannerRunning) return;
+        isScannerRunning = false;
+
+        html5QrCode.stop().then(() => {
+            document.getElementById('pass_id_input').value = decodedText.trim();
+            setCameraStatus("✅ QR Scanned!", "var(--success)");
+            validatePass();
+        }).catch((err) => {
+            console.error("Failed to stop scanner", err);
+            document.getElementById('pass_id_input').value = decodedText.trim();
+            validatePass();
+        });
+    }
+
+    function onScanFailure(error) {
+        // Silently ignore scan frame failures (normal during scanning)
+    }
+
+    async function validatePass() {
+        const passId = document.getElementById('pass_id_input').value.trim();
+        if (!passId) return alert("Please enter a Pass ID or Scan a QR Code");
+
+        try {
+            const response = await fetch('/api/scan/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    main_pass_id: passId,
+                    device_id: 'CONDUCTOR_WEB_01'
+                })
+            });
+
+            const data = await response.json();
+            showResult(data, response.status);
+        } catch (error) {
+            console.error("Error:", error);
+            alert("Server error. Please check connection.");
+        }
+    }
+
+    function showResult(data, status) {
+        const resultDiv = document.getElementById('scan-result');
+        const inputDiv = document.getElementById('scanner-input');
+        const icon = document.getElementById('result-icon');
+        const title = document.getElementById('result-title');
+        const msg = document.getElementById('result-message');
+        const details = document.getElementById('result-details');
+
+        inputDiv.style.display = 'none';
+        resultDiv.style.display = 'block';
+
+        if (data.status === 'success') {
+            resultDiv.style.background = 'rgba(16, 185, 129, 0.1)';
+            resultDiv.style.border = '2px solid var(--success)';
+            icon.innerText = '✅';
+            title.innerText = 'ACCESS GRANTED';
+            title.style.color = 'var(--success)';
+            msg.innerText = data.message;
+
+            let detailsHtml = `<strong>User:</strong> ${data.user}<br>
+                               <strong>Type:</strong> ${data.type}<br>
+                               <strong>Trip Number:</strong> ${data.trip_number}`;
+            if (data.remaining_trips !== undefined) {
+                detailsHtml += `<br><strong>Remaining Trips:</strong> ${data.remaining_trips}`;
+            }
+            details.innerHTML = detailsHtml;
+        } else {
+            resultDiv.style.background = 'rgba(239, 68, 68, 0.1)';
+            resultDiv.style.border = '2px solid var(--danger)';
+            icon.innerText = '❌';
+            title.innerText = 'ACCESS DENIED';
+            title.style.color = 'var(--danger)';
+            msg.innerText = data.message;
+            details.innerHTML = '<strong>Reason:</strong> ' + (data.message || 'Check pass status or monthly renewal.');
+        }
+    }
+
+    function resetScanner() {
+        document.getElementById('scan-result').style.display = 'none';
+        document.getElementById('scanner-input').style.display = 'block';
+        document.getElementById('pass_id_input').value = '';
+        isScannerRunning = false;
+
+        if (scannerReady) {
+            startScanner();
+        } else {
+            waitForLibrary(() => startScanner());
+        }
+
+        setTimeout(() => {
+            document.getElementById('pass_id_input').focus();
+        }, 300);
+    }
+</script>
+{% endblock %}

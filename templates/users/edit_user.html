@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}Edit User - PassPro{% endblock %}
+
+{% block content %}
+<div class="container max-w-md">
+    <div class="glass-card">
+        <h2 class="mb-2">Edit User: {{ u.username }}</h2>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label>First Name</label>
+                <input type="text" name="first_name" value="{{ u.first_name }}">
+            </div>
+            <div class="form-group">
+                <label>Last Name</label>
+                <input type="text" name="last_name" value="{{ u.last_name }}">
+            </div>
+            <div class="form-group">
+                <label>Phone</label>
+                <input type="text" name="phone" value="{{ u.phone }}">
+            </div>
+            {% if u.role == 'STUDENT' %}
+            <div class="form-group">
+                <label>College</label>
+                <input type="text" name="college" value="{{ u.college }}">
+            </div>
+            {% endif %}
+            {% if u.role == 'PUBLIC' %}
+            <div class="form-group">
+                <label>Address</label>
+                <textarea name="address">{{ u.address }}</textarea>
+            </div>
+            {% endif %}
+            <div class="form-group">
+                <label>Route</label>
+                <input type="text" name="route" value="{{ u.route }}">
+            </div>
+            
+            <div class="flex-between mt-2">
+                <a href="{% url 'dashboard' %}" class="btn btn-outline">Cancel</a>
+                <button type="submit" class="btn btn-primary">Update User</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

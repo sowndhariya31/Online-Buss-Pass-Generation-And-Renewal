@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% block title %}Pay Renewal - PassPro{% endblock %}
+
+{% block content %}
+<div class="max-w-md">
+    <div class="glass-card">
+        <h2 class="text-center mb-2">Complete Renewal Payment</h2>
+        <div class="text-center mb-2">
+            <p style="color: var(--text-muted);">Amount Due for {{ renewal.month }}</p>
+            <h1 style="color: var(--success); font-size: 3rem;">
+                ₹{{ amount }}
+            </h1>
+        </div>
+
+        <!-- Pass Details -->
+        <div
+            style="border: 1px solid var(--glass-border); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; background: rgba(255,255,255,0.02); margin-top: 1.5rem;">
+            <div class="flex-between mb-1" style="margin-bottom: 0.5rem;">
+                <span>Pass ID:</span>
+                <strong style="color: var(--primary);">{{ main_pass.main_pass_id }}</strong>
+            </div>
+            <div class="flex-between mb-1" style="margin-bottom: 0.5rem;">
+                <span>Month:</span>
+                <strong>{{ renewal.month }}</strong>
+            </div>
+            <div class="flex-between" style="margin-bottom: 0.5rem;">
+                <span>User:</span>
+                <span>{{ user.get_full_name|default:user.username }}</span>
+            </div>
+        </div>
+
+        <!-- Pay Button -->
+        <form method="post" id="payment-form">
+            {% csrf_token %}
+            <script src="https://checkout.razorpay.com/v1/checkout.js"
+                    data-key="{{ razorpay_merchant_key }}"
+                    data-amount="{{ razorpay_amount }}"
+                    data-currency="{{ currency }}"
+                    data-order_id="{{ razorpay_order_id }}"
+                    data-buttontext="💳 Pay with Razorpay"
+                    data-name="PassPro"
+                    data-description="Bus Pass Renewal - {{ renewal.month }}"
+                    data-prefill.name="{{ user.get_full_name|default:user.username }}"
+                    data-prefill.email="{{ user.email|default:'' }}"
+                    data-theme.color="#3399cc">
+            </script>
+        </form>
+
+        <script>
+            // Style the automatically generated Razorpay button to match our UI
+            window.addEventListener('load', function() {
+                var rzpBtn = document.querySelector('.razorpay-payment-button');
+                if(rzpBtn) {
+                    rzpBtn.className = 'btn btn-primary';
+                    rzpBtn.style.width = '100%';
+                    rzpBtn.style.fontSize = '1.2rem';
+                    rzpBtn.style.padding = '1rem';
+                }
+            });
+        </script>
+
+        <p class="text-center mt-2" style="font-size: 0.8rem; color: var(--text-muted);">
+            🔒 Secured by PassPro Payment Gateway
+        </p>
+    </div>
+</div>
+{% endblock %}

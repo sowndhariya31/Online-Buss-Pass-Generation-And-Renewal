@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block title %}Renew Pass - PassPro{% endblock %}
+
+{% block content %}
+<div class="max-w-md">
+    <div class="glass-card">
+        <h2 class="text-center mb-2">Renew Bus Pass</h2>
+        <p class="text-center" style="color: var(--text-muted); margin-bottom: 2.5rem;">
+            Enter your Permanent Pass ID to proceed with monthly renewal.
+        </p>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label>Permanent Pass ID</label>
+                <input type="text" name="pass_id" placeholder="MTC2026-000001" required
+                    style="text-align: center; font-size: 1.2rem; letter-spacing: 2px;">
+                {% if error %}
+                <small style="color: var(--danger); display: block; margin-top: 0.5rem;">{{ error }}</small>
+                {% endif %}
+            </div>
+
+            <button type="submit" class="btn btn-primary"
+                style="width: 100%; margin-top: 1rem; padding: 1rem; border-radius: 50px;">
+                Find Pass for Renewal
+            </button>
+        </form>
+
+        <div
+            style="margin-top: 2rem; padding: 1.5rem; background: rgba(255,255,255,0.02); border-radius: 12px; border: 1px solid var(--glass-border);">
+            <h4 style="margin-bottom: 0.5rem;">Important Information</h4>
+            <ul style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.6; padding-left: 1.2rem;">
+                <li>Monthly renewal does not require admin approval.</li>
+                <li>Ensure you have your Permanent ID ready.</li>
+                <li>Renewal is valid for 30 days from the date of payment.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

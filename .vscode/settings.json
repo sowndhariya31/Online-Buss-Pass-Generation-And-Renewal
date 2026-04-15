@@ -1,0 +1,14 @@
+{
+    "python.defaultInterpreterPath": "${workspaceFolder}/venv/Scripts/python.exe",
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}"
+    ],
+    "python.pythonPath": "${workspaceFolder}/venv/Scripts/python.exe",
+    "python.linting.enabled": true,
+    "css.validate": false,
+    "files.associations": {
+        "*.html": "django-html"
+    },
+    "pyre.projectRoot": "${workspaceFolder}",
+    "pyre.enable": false
+}

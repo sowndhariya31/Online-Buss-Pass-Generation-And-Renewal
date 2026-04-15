@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %}Manage Routes - PassPro{% endblock %}
+
+{% block content %}
+<div class="flex-between mb-2">
+    <h2>Manage Routes</h2>
+    <div>
+        <a href="{% url 'dashboard' %}" class="btn btn-outline" style="margin-right: 1rem;">Back</a>
+        <a href="{% url 'add_route' %}" class="btn btn-primary">+ Add Route</a>
+    </div>
+</div>
+
+<div class="glass-card" style="padding: 1.5rem;">
+    {% if routes %}
+    <table class="glass-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Route Name</th>
+                <th>From</th>
+                <th>To</th>
+                <th>Price</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in routes %}
+            <tr>
+                <td>{{ r.id }}</td>
+                <td>{{ r.route_name }}</td>
+                <td>{{ r.from_location }}</td>
+                <td>{{ r.to_location }}</td>
+                <td>₹{{ r.price }}</td>
+                <td>
+                    <a href="{% url 'delete_route' r.id %}" class="btn btn-danger"
+                        style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="text-center py-2" style="color: var(--text-muted);">
+        <p>No routes available. Please add some routes.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

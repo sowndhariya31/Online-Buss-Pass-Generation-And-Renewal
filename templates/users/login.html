@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Login - Online Bus Pass Generation And Renewal{% endblock %}
+
+{% block content %}
+<div class="max-w-md">
+    <div class="glass-card">
+        <h2 class="text-center mb-2">User & Admin Login</h2>
+        <p class="text-center mb-2 text-muted" style="font-size: 0.9em;">Admins and regular users can login here.</p>
+        <form method="post">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="form-group">
+                {{ field.label_tag }}
+                {{ field }}
+                {% if field.errors %}
+                <div style="color: var(--danger); font-size: 0.85rem; margin-top: 0.3rem;">
+                    {{ field.errors|striptags }}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Login</button>
+        </form>
+        <p class="text-center mt-2">
+            Don't have an account? <a href="{% url 'register' %}" style="color: var(--primary);">Register here</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

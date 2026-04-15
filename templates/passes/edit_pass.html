@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}Edit Pass - PassPro{% endblock %}
+
+{% block content %}
+<div class="container max-w-md">
+    <div class="glass-card">
+        <h2 class="mb-2">Edit Pass: {{ p.main_pass_id|default:"Pending" }}</h2>
+        <p class="mb-2" style="color: var(--text-muted);">User: {{ p.user.username }} | Type: {{ p.pass_type }}</p>
+        
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label>Status</label>
+                <select name="status">
+                    <option value="PENDING" {% if p.status == 'PENDING' %}selected{% endif %}>Pending</option>
+                    <option value="ACTIVE" {% if p.status == 'ACTIVE' %}selected{% endif %}>Active</option>
+                    <option value="BLOCKED" {% if p.status == 'BLOCKED' %}selected{% endif %}>Blocked</option>
+                    <option value="EXPIRED" {% if p.status == 'EXPIRED' %}selected{% endif %}>Expired</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Expiry Date</label>
+                <input type="date" name="expiry_date" value="{{ p.expiry_date|date:'Y-m-d' }}">
+            </div>
+            
+            <div class="flex-between mt-2">
+                <a href="{% url 'dashboard' %}" class="btn btn-outline">Cancel</a>
+                <button type="submit" class="btn btn-primary">Update Pass</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

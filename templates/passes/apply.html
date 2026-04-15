@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+{% block title %}Apply Bus Pass - PassPro{% endblock %}
+
+{% block content %}
+<div class="max-w-md">
+    <div class="glass-card">
+        <h2 class="text-center mb-2">Apply for Bus Pass</h2>
+        <p class="text-center" style="color: var(--text-muted); margin-bottom: 2rem;">
+            {% if user.role == 'STUDENT' %}
+            Apply for Yearly Student Pass (₹280). 2 trips per day.
+            {% else %}
+            Apply for Monthly Public Pass (₹1000). Unlimited trips.
+            {% endif %}
+        </p>
+
+        <form method="post" enctype="multipart/form-data" id="apply-form">
+            {% csrf_token %}
+
+            <!-- Step 1: Pass Selection -->
+            <div id="step-1">
+                <div class="form-group">
+                    <label>Choose Pass Type</label>
+                    {{ pass_form.pass_type }}
+                </div>
+                <div id="pass-type-error"
+                    style="color: var(--danger); font-size: 0.85rem; margin-top: 0.5rem; display: none;">Please select a
+                    pass type to continue.</div>
+                <button type="button" id="next-btn" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Next
+                    Step</button>
+            </div>
+
+            <!-- Step 2: Verification Details -->
+            <div id="step-2" style="display: none;">
+                <h3 id="details-header"
+                    style="margin-top:2rem; margin-bottom:1rem; border-bottom:1px solid var(--glass-border); padding-bottom:0.5rem;">
+                    Verification Details</h3>
+
+                {% for field in detail_form %}
+                <div class="form-group" {% if field.name == 'college' %}id="college-field-container" {% endif %}>
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {% if field.errors %}
+                    <small style="color:var(--danger);">{{ field.errors|striptags }}</small>
+                    {% endif %}
+                </div>
+                {% endfor %}
+
+                <div
+                    style="background: rgba(99, 102, 241, 0.1); padding: 1rem; border-radius: 8px; border: 1px dashed var(--primary); margin: 2rem 0;">
+                    <p style="font-size: 0.9rem; color: var(--text-main);">
+                        <strong>Note:</strong> Your application will be sent to the admin for approval. Once approved,
+                        you
+                        can pay and download your QR pass.
+                    </p>
+                </div>
+
+                <div id="step-2-error"
+                    style="color: var(--danger); font-size: 0.85rem; margin-top: 1rem; display: none; background: rgba(239, 68, 68, 0.1); padding: 0.5rem; border-radius: 4px; border: 1px solid var(--danger);">
+                    Please fill out all required fields before submitting.</div>
+
+                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                    <button type="button" id="back-btn" class="btn btn-outline" style="flex: 1;">Back</button>
+                    <button type="submit" class="btn btn-primary" style="flex: 2;">Submit Application</button>
+                </div>
+            </div>
+        </form>
+
+        <a href="{% url 'dashboard' %}" class="btn btn-outline" id="dashboard-link"
+            style="width: 100%; margin-top: 1rem;">Back to Dashboard</a>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('apply-form');
+        const step1 = document.getElementById('step-1');
+        const step2 = document.getElementById('step-2');
+        const nextBtn = document.getElementById('next-btn');
+        const backBtn = document.getElementById('back-btn');
+        const dashboardLink = document.getElementById('dashboard-link');
+        const passTypeSelect = document.querySelector('select[name="pass_type"]');
+        const collegeContainer = document.getElementById('college-field-container');
+        const detailsHeader = document.getElementById('details-header');
+        const step2Error = document.getElementById('step-2-error');
+
+        function updateStep2() {
+            if (!passTypeSelect) return;
+            const passType = passTypeSelect.value;
+            if (passType === 'PUBLIC') {
+                if (collegeContainer) collegeContainer.style.display = 'none';
+                if (detailsHeader) detailsHeader.textContent = 'Public Details';
+            } else {
+                if (collegeContainer) collegeContainer.style.display = 'block';
+                if (detailsHeader) detailsHeader.textContent = 'Student Details';
+            }
+        }
+
+        nextBtn.addEventListener('click', function () {
+            if (!passTypeSelect.value) {
+                document.getElementById('pass-type-error').style.display = 'block';
+                return;
+            }
+            document.getElementById('pass-type-error').style.display = 'none';
+            updateStep2();
+            step1.style.display = 'none';
+            step2.style.display = 'block';
+            dashboardLink.style.display = 'none';
+        });
+
+        backBtn.addEventListener('click', function () {
+            step1.style.display = 'block';
+            step2.style.display = 'none';
+            dashboardLink.style.display = 'block';
+            step2Error.style.display = 'none';
+        });
+
+        form.addEventListener('submit', function (e) {
+            const passType = passTypeSelect.value;
+            const address = document.querySelector('[name="address"]').value.trim();
+            const route = document.querySelector('[name="route"]').value.trim();
+            const photo = document.querySelector('[name="photo"]').value;
+            const idProof = document.querySelector('[name="id_proof"]').value;
+
+            let isValid = true;
+
+            if (passType === 'STUDENT') {
+                const college = document.querySelector('[name="college"]').value.trim();
+                if (!college) isValid = false;
+            }
+
+            if (!address || !route || !photo || !idProof) {
+                isValid = false;
+            }
+
+            if (!isValid) {
+                e.preventDefault();
+                step2Error.style.display = 'block';
+                // Scroll to error
+                step2Error.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            } else {
+                step2Error.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock %}
