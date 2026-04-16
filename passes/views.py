@@ -128,22 +128,32 @@ def pay_pass(request, pk):
     client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
     
     if request.method == 'POST':
-        # On successful Razorpay payment callback
-        main_pass.payment_status = 'PAID'
-        main_pass.save()
-        
-        # Generate the pass ID now that payment is complete
-        main_pass.generate_pass_id()
-        
-        # Also mark the current month's renewal as PAID if it exists
-        today = timezone.now().date()
-        current_month = today.strftime('%b').upper()
-        renewal = main_pass.renewals.filter(month=current_month, payment_status='PENDING').first()
-        if renewal:
-            renewal.payment_status = 'PAID'
-            renewal.save()
+        params_dict = {
+            'razorpay_order_id': request.POST.get('razorpay_order_id'),
+            'razorpay_payment_id': request.POST.get('razorpay_payment_id'),
+            'razorpay_signature': request.POST.get('razorpay_signature')
+        }
+        try:
+            client.utility.verify_payment_signature(params_dict)
             
-        return redirect('dashboard')
+            # On successful Razorpay payment verification
+            main_pass.payment_status = 'PAID'
+            main_pass.save()
+            
+            # Generate the pass ID now that payment is complete
+            main_pass.generate_pass_id()
+            
+            # Also mark the current month's renewal as PAID if it exists
+            today = timezone.now().date()
+            current_month = today.strftime('%b').upper()
+            renewal = main_pass.renewals.filter(month=current_month, payment_status='PENDING').first()
+            if renewal:
+                renewal.payment_status = 'PAID'
+                renewal.save()
+                
+            return redirect('dashboard')
+        except Exception as e:
+            return HttpResponse(f"Payment Verification Failed: {str(e)}", status=400)
     
     # Generate Razorpay order
     payment = client.order.create({
@@ -173,18 +183,28 @@ def pay_renewal(request, pk):
     client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
     
     if request.method == 'POST':
-        renewal.payment_status = 'PAID'
-        renewal.save()
-        
-        # Generate the unique renewal ID for scanner
-        renewal.generate_renewal_id()
-        
-        # Update main pass current_valid_to
-        if not main_pass.current_valid_to or renewal.valid_to > main_pass.current_valid_to:
-            main_pass.current_valid_to = renewal.valid_to
-            main_pass.save()
+        params_dict = {
+            'razorpay_order_id': request.POST.get('razorpay_order_id'),
+            'razorpay_payment_id': request.POST.get('razorpay_payment_id'),
+            'razorpay_signature': request.POST.get('razorpay_signature')
+        }
+        try:
+            client.utility.verify_payment_signature(params_dict)
             
-        return redirect('dashboard')
+            renewal.payment_status = 'PAID'
+            renewal.save()
+            
+            # Generate the unique renewal ID for scanner
+            renewal.generate_renewal_id()
+            
+            # Update main pass current_valid_to
+            if not main_pass.current_valid_to or renewal.valid_to > main_pass.current_valid_to:
+                main_pass.current_valid_to = renewal.valid_to
+                main_pass.save()
+                
+            return redirect('dashboard')
+        except Exception as e:
+            return HttpResponse(f"Payment Verification Failed: {str(e)}", status=400)
     
     # Generate Razorpay order
     payment = client.order.create({
