@@ -88,15 +88,8 @@ WSGI_APPLICATION = 'buspass_project.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'buspass_db',
-        'USER': 'root',
-        'PASSWORD': '',
-        'HOST': 'localhost',
-        'PORT': '3306',
-        'OPTIONS': {
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-        }
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
@@ -104,9 +97,6 @@ DATABASES = {
 db_url = os.environ.get("DATABASE_URL")
 if db_url:
     DATABASES['default'] = dj_database_url.parse(db_url, conn_max_age=600)
-    # Remove MySQL specific options when using Postgres on Render
-    if 'OPTIONS' in DATABASES['default']:
-        del DATABASES['default']['OPTIONS']
 
 
 # Password validation
