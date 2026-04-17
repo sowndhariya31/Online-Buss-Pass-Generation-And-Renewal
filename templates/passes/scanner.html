@@ -219,7 +219,8 @@
             title.style.color = 'var(--success)';
             msg.innerText = data.message;
 
-            let detailsHtml = `<strong>User:</strong> ${data.user}<br>
+            let detailsHtml = `<strong>ID:</strong> ${data.scanned_id}<br>
+                               <strong>User:</strong> ${data.user}<br>
                                <strong>Type:</strong> ${data.type}<br>
                                <strong>Trip Number:</strong> ${data.trip_number}`;
             if (data.remaining_trips !== undefined) {

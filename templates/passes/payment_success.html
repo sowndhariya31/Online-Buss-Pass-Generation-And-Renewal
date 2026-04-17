@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}Payment Success - PassPro{% endblock %}
+
+{% block content %}
+<div class="max-w-md text-center">
+    <div class="glass-card">
+        <div style="width: 80px; height: 80px; background: rgba(72, 187, 120, 0.1); color: var(--success); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
+            <span class="material-icons" style="font-size: 3rem;">check_circle</span>
+        </div>
+        
+        <h1 style="color: var(--success); margin-bottom: 0.5rem;">Payment Successful!</h1>
+        <p style="color: var(--text-muted); margin-bottom: 2rem;">Your transaction has been completed successfully.</p>
+        
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); border-radius: 12px; padding: 1.5rem; text-align: left; margin-bottom: 2rem;">
+            <div class="flex-between mb-1">
+                <span style="color: var(--text-muted);">Payment ID:</span>
+                <span style="font-family: monospace; font-weight: 600;">{{ payment_id }}</span>
+            </div>
+            <div class="flex-between">
+                <span style="color: var(--text-muted);">Status:</span>
+                <span style="color: var(--success); font-weight: 600;">COMPLETED</span>
+            </div>
+        </div>
+        
+        <p style="margin-bottom: 2rem; line-height: 1.6;">
+            Your bus pass is now active. You can download your digital ID card from the dashboard.
+        </p>
+        
+        <div class="flex-column gap-1">
+            <a href="{% url 'dashboard' %}" class="btn btn-primary" style="width: 100%;">Go to Dashboard</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

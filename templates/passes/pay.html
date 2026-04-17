@@ -13,8 +13,7 @@
         </div>
 
         <!-- Pass Details -->
-        <div
-            style="border: 1px solid var(--glass-border); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; background: rgba(255,255,255,0.02); margin-top: 1.5rem;">
+        <div style="border: 1px solid var(--glass-border); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; background: rgba(255,255,255,0.02); margin-top: 1.5rem;">
             <div class="flex-between mb-1" style="margin-bottom: 0.5rem;">
                 <span>Pass ID:</span>
                 <strong style="color: var(--primary);">{{ main_pass.main_pass_id|default:"(Pending)" }}</strong>
@@ -29,31 +28,24 @@
             </div>
         </div>
 
-        <!-- Pay Button -->
-        <div id="razorpay-button-container">
-            <button id="rzp-button1" class="btn btn-primary" style="width: 100%; font-size: 1.2rem; padding: 1rem;">
-                💳 Pay with Razorpay
-            </button>
-        </div>
-
-        <!-- Test Mode Guide -->
-        <div class="mt-2" style="background: rgba(255, 193, 7, 0.1); border: 1px solid rgba(255, 193, 7, 0.2); border-radius: 8px; padding: 1rem; font-size: 0.85rem;">
-            <p style="color: #ffc107; font-weight: bold; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
-                <span class="material-icons" style="font-size: 1rem;">info</span> Test Mode Instructions
+        <!-- Payment Info -->
+        <div class="mt-2" style="background: rgba(99, 179, 237, 0.08); border: 1px solid rgba(99, 179, 237, 0.2); border-radius: 8px; padding: 1rem; font-size: 0.9rem; margin-bottom: 1.5rem;">
+            <p style="color: #63b3ed; font-weight: bold; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <span class="material-icons" style="font-size: 1.1rem;">info</span> Payment Instructions
             </p>
-            <ul style="color: var(--text-muted); list-style: disc; padding-left: 1.2rem; line-height: 1.4;">
-                <li><strong>Cards:</strong> Use 4012 0000 0000 0012 (Domestic)</li>
-                <li><strong>Netbanking:</strong> Select any bank (CNRB, BARB, etc.) and click <strong>"Success"</strong> on the next page.</li>
-                <li><strong>Wallets:</strong> Use any dummy wallet and click <strong>"Success"</strong>.</li>
+            <ul style="color: var(--text-muted); list-style: disc; padding-left: 1.2rem; line-height: 1.7;">
+                <li>Pay the amount of <strong style="color: var(--text);">₹{{ amount }}</strong> at the nearest bus pass counter.</li>
+                <li>Show this page to the counter staff and click <strong style="color: var(--text);">"Confirm Payment"</strong> after paying.</li>
+                <li>Your pass will be activated immediately.</li>
             </ul>
         </div>
 
-        <form method="post" id="payment-success-form" style="display: none;">
-            {% csrf_token %}
-            <input type="hidden" name="razorpay_payment_id" id="razorpay_payment_id">
-            <input type="hidden" name="razorpay_order_id" id="razorpay_order_id">
-            <input type="hidden" name="razorpay_signature" id="razorpay_signature">
-        </form>
+        <!-- Razorpay Payment Button -->
+        <div class="text-center">
+            <button id="rzp-button1" class="btn btn-primary" style="width: 100%; font-size: 1.2rem; padding: 1rem;">
+                💳 Pay Now with Razorpay
+            </button>
+        </div>
 
         <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
         <script>
@@ -61,40 +53,20 @@
                 "key": "{{ razorpay_merchant_key }}",
                 "amount": "{{ razorpay_amount }}",
                 "currency": "{{ currency }}",
-                "name": "PassPro",
-                "description": "Bus Pass Payment",
+                "name": "PassPro Payments",
+                "description": "Bus Pass Issuance Fee",
                 "order_id": "{{ razorpay_order_id }}",
-                "config": {
-                    "display": {
-                        "blocks": {
-                            "preferred": {
-                                "name": "Requested Methods",
-                                "instruments": [
-                                    { "method": "card", "networks": ["Visa", "MasterCard", "RuPay", "Maestro"] },
-                                    { "method": "netbanking", "banks": ["BARB_R", "CNRB", "PUNB_R", "UTBI"] },
-                                    { "method": "wallet", "wallets": ["mobikwik", "airtelmoney", "olamoney"] },
-                                    { "method": "paylater", "providers": ["lazypay", "icic", "epaylater"] }
-                                ]
-                            }
-                        },
-                        "sequence": ["block.preferred", "card", "netbanking", "wallet", "paylater"],
-                        "preferences": {
-                            "show_default_blocks": true
-                        }
-                    }
-                },
-                "handler": function (response){
-                    document.getElementById('razorpay_payment_id').value = response.razorpay_payment_id;
-                    document.getElementById('razorpay_order_id').value = response.razorpay_order_id;
-                    document.getElementById('razorpay_signature').value = response.razorpay_signature;
-                    document.getElementById('payment-success-form').submit();
-                },
+                "callback_url": "{{ callback_url }}",
                 "prefill": {
                     "name": "{{ user.get_full_name|default:user.username }}",
-                    "email": "{{ user.email|default:'' }}"
+                    "email": "{{ user.email }}",
+                    "contact": "{{ user.phone|default:'' }}"
+                },
+                "notes": {
+                    "address": "PassPro Headquarters"
                 },
                 "theme": {
-                    "color": "#3399cc"
+                    "color": "#6366f1"
                 }
             };
             var rzp1 = new Razorpay(options);

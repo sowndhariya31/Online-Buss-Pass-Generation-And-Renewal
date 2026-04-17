@@ -3,11 +3,17 @@ from django.contrib.auth.decorators import login_required
 from .models import MainPass, MonthlyRenewal, UsageLog
 from django.http import HttpResponse
 from django.utils import timezone
-from django.conf import settings
 import datetime
 import razorpay
+from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
 
 from .forms import ApplyPassForm, PassDetailForm
+
+# Initialize Razorpay Client
+razorpay_client = razorpay.Client(
+    auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET)
+)
 
 @login_required
 def apply_pass(request):
@@ -122,55 +128,40 @@ def pay_pass(request, pk):
     # Only allow payment if admin has approved (status is ACTIVE)
     if main_pass.status != 'ACTIVE':
         return redirect('dashboard')
+    
+    # Skip if already paid
+    if main_pass.payment_status == 'PAID':
+        return redirect('dashboard')
         
     amount_rupees = 280 if main_pass.pass_type == 'STUDENT' else 1000
+    
+    amount_rupees = 280 if main_pass.pass_type == 'STUDENT' else 1000
+    currency = 'INR'
     amount_paise = amount_rupees * 100
-    client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
-    
-    if request.method == 'POST':
-        params_dict = {
-            'razorpay_order_id': request.POST.get('razorpay_order_id'),
-            'razorpay_payment_id': request.POST.get('razorpay_payment_id'),
-            'razorpay_signature': request.POST.get('razorpay_signature')
-        }
-        try:
-            client.utility.verify_payment_signature(params_dict)
-            
-            # On successful Razorpay payment verification
-            main_pass.payment_status = 'PAID'
-            main_pass.save()
-            
-            # Generate the pass ID now that payment is complete
-            main_pass.generate_pass_id()
-            
-            # Also mark the current month's renewal as PAID if it exists
-            today = timezone.now().date()
-            current_month = today.strftime('%b').upper()
-            renewal = main_pass.renewals.filter(month=current_month, payment_status='PENDING').first()
-            if renewal:
-                renewal.payment_status = 'PAID'
-                renewal.save()
-                
-            return redirect('dashboard')
-        except Exception as e:
-            return HttpResponse(f"Payment Verification Failed: {str(e)}", status=400)
-    
-    # Generate Razorpay order
-    payment = client.order.create({
-        "amount": amount_paise,
-        "currency": "INR",
-        "payment_capture": "1"
+
+    # Create Razorpay Order
+    razorpay_order = razorpay_client.order.create({
+        'amount': amount_paise,
+        'currency': currency,
+        'payment_capture': '1'
     })
+    razorpay_order_id = razorpay_order['id']
     
-    return render(request, 'passes/pay.html', {
+    # Save the order ID to the pass record for later verification
+    main_pass.razorpay_order_id = razorpay_order_id
+    main_pass.save()
+
+    context = {
         'main_pass': main_pass,
         'amount': amount_rupees,
-        'razorpay_order_id': payment['id'],
+        'razorpay_order_id': razorpay_order_id,
         'razorpay_merchant_key': settings.RAZORPAY_KEY_ID,
         'razorpay_amount': amount_paise,
-        'currency': 'INR',
-        'callback_url': request.build_absolute_uri(),
-    })
+        'currency': currency,
+        'callback_url': request.build_absolute_uri('/passes/paymenthandler/')
+    }
+    
+    return render(request, 'passes/pay.html', context=context)
 
 
 @login_required
@@ -178,51 +169,113 @@ def pay_renewal(request, pk):
     renewal = get_object_or_404(MonthlyRenewal, pk=pk, main_pass__user=request.user)
     main_pass = renewal.main_pass
     
+    # Skip if already paid
+    if renewal.payment_status == 'PAID':
+        return redirect('dashboard')
+    
     amount_rupees = 280 if main_pass.pass_type == 'STUDENT' else 1000
+    
+    amount_rupees = 280 if main_pass.pass_type == 'STUDENT' else 1000
+    currency = 'INR'
     amount_paise = amount_rupees * 100
-    client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
-    
-    if request.method == 'POST':
-        params_dict = {
-            'razorpay_order_id': request.POST.get('razorpay_order_id'),
-            'razorpay_payment_id': request.POST.get('razorpay_payment_id'),
-            'razorpay_signature': request.POST.get('razorpay_signature')
-        }
-        try:
-            client.utility.verify_payment_signature(params_dict)
-            
-            renewal.payment_status = 'PAID'
-            renewal.save()
-            
-            # Generate the unique renewal ID for scanner
-            renewal.generate_renewal_id()
-            
-            # Update main pass current_valid_to
-            if not main_pass.current_valid_to or renewal.valid_to > main_pass.current_valid_to:
-                main_pass.current_valid_to = renewal.valid_to
-                main_pass.save()
-                
-            return redirect('dashboard')
-        except Exception as e:
-            return HttpResponse(f"Payment Verification Failed: {str(e)}", status=400)
-    
-    # Generate Razorpay order
-    payment = client.order.create({
-        "amount": amount_paise,
-        "currency": "INR",
-        "payment_capture": "1"
+
+    # Create Razorpay Order
+    razorpay_order = razorpay_client.order.create({
+        'amount': amount_paise,
+        'currency': currency,
+        'payment_capture': '1'
     })
+    razorpay_order_id = razorpay_order['id']
     
-    return render(request, 'passes/pay_renewal.html', {
+    # Save the order ID to the renewal record for later verification
+    renewal.razorpay_order_id = razorpay_order_id
+    renewal.save()
+
+    context = {
         'renewal': renewal,
         'main_pass': main_pass,
         'amount': amount_rupees,
-        'razorpay_order_id': payment['id'],
+        'razorpay_order_id': razorpay_order_id,
         'razorpay_merchant_key': settings.RAZORPAY_KEY_ID,
         'razorpay_amount': amount_paise,
-        'currency': 'INR',
-        'callback_url': request.build_absolute_uri(),
-    })
+        'currency': currency,
+        'callback_url': request.build_absolute_uri('/passes/paymenthandler/')
+    }
+    
+    return render(request, 'passes/pay_renewal.html', context=context)
+
+
+@csrf_exempt
+def paymenthandler(request):
+    if request.method == "POST":
+        try:
+            # get the required parameters from post request.
+            payment_id = request.POST.get('razorpay_payment_id', '')
+            razorpay_order_id = request.POST.get('razorpay_order_id', '')
+            signature = request.POST.get('razorpay_signature', '')
+            
+            params_dict = {
+                'razorpay_order_id': razorpay_order_id,
+                'razorpay_payment_id': payment_id,
+                'razorpay_signature': signature
+            }
+
+            # verify the payment signature.
+            try:
+                razorpay_client.utility.verify_payment_signature(params_dict)
+            except Exception as e:
+                # signature verification failed
+                print(f"Signature Verification Failed: {e}")
+                return render(request, 'passes/payment_failed.html')
+
+            # Verification Successful - find the record by order_id
+            from .models import MainPass, MonthlyRenewal
+            
+            # 1. Look for a Main Pass with this order ID
+            main_pass = MainPass.objects.filter(razorpay_order_id=razorpay_order_id).first()
+            if main_pass:
+                if main_pass.payment_status != 'PAID':
+                    main_pass.payment_status = 'PAID'
+                    main_pass.save()
+                    main_pass.generate_pass_id()
+                    
+                    # Also mark current month's renewal if it exists
+                    today = timezone.now().date()
+                    current_month = today.strftime('%b').upper()
+                    renewal = main_pass.renewals.filter(month=current_month, payment_status='PENDING').first()
+                    if renewal:
+                        renewal.payment_status = 'PAID'
+                        renewal.save()
+                        renewal.generate_renewal_id()
+                
+                return render(request, 'passes/payment_success.html', {'payment_id': payment_id})
+
+            # 2. Look for a Monthly Renewal with this order ID
+            renewal = MonthlyRenewal.objects.filter(razorpay_order_id=razorpay_order_id).first()
+            if renewal:
+                if renewal.payment_status != 'PAID':
+                    renewal.payment_status = 'PAID'
+                    renewal.save()
+                    renewal.generate_renewal_id()
+                    
+                    # Update main pass validity
+                    mp = renewal.main_pass
+                    if not mp.current_valid_to or renewal.valid_to > mp.current_valid_to:
+                        mp.current_valid_to = renewal.valid_to
+                        mp.save()
+                
+                return render(request, 'passes/payment_success.html', {'payment_id': payment_id})
+
+            return render(request, 'passes/payment_failed.html')
+
+            return render(request, 'passes/payment_failed.html')
+
+        except Exception as e:
+            # if we are not able to find the pass/renewal or some other error
+            return render(request, 'passes/payment_failed.html')
+    else:
+        # if post request is not come
+        return redirect('dashboard')
 
 
 @login_required
@@ -307,30 +360,4 @@ def delete_pass_view(request, pk):
     from django.contrib import messages
     messages.warning(request, f"Pass {pass_id} deleted.")
     return redirect('dashboard')
-
-def test_razorpay(request):
-    from django.conf import settings
-    import razorpay
-    client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
-    payment = client.order.create({"amount": 10000, "currency": "INR", "payment_capture": "1"})
-    
-    class MockPass:
-        pk = 999
-        main_pass_id = "TEST-123"
-        def get_pass_type_display(self): return "STUDENT"
-            
-    class MockUser:
-        def get_full_name(self): return "Test User"
-        def username(self): return "testuser"
-        email = "test@example.com"
-        
-    return render(request, 'passes/pay.html', {
-        'main_pass': MockPass(),
-        'user': MockUser(),
-        'amount': 100,
-        'razorpay_order_id': payment['id'],
-        'razorpay_merchant_key': settings.RAZORPAY_KEY_ID,
-        'razorpay_amount': 10000,
-        'currency': 'INR'
-    })
 

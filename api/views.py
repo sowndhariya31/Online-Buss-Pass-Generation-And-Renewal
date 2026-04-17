@@ -70,7 +70,8 @@ def scan_pass(request):
                 "trip_number": main_pass.daily_trip_count,
                 "remaining_trips": 2 - main_pass.daily_trip_count,
                 "user": main_pass.user.get_full_name() or main_pass.user.username,
-                "type": "STUDENT"
+                "type": "STUDENT",
+                "scanned_id": main_pass_id
             })
         else:
             main_pass.daily_trip_count += 1
@@ -86,7 +87,8 @@ def scan_pass(request):
                 "message": "Success! Unlimited Access granted.", 
                 "trip_number": main_pass.daily_trip_count,
                 "user": main_pass.user.get_full_name() or main_pass.user.username,
-                "type": "PUBLIC"
+                "type": "PUBLIC",
+                "scanned_id": main_pass_id
             })
 
     return JsonResponse({"status": "error", "message": "Method not allowed"}, status=405)

@@ -24,6 +24,7 @@ class MainPass(models.Model):
     expiry_date = models.DateField()
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='PENDING')
     payment_status = models.CharField(max_length=10, choices=PAYMENT_STATUS_CHOICES, default='PENDING')
+    razorpay_order_id = models.CharField(max_length=100, null=True, blank=True, unique=True)
     
     # SRD Daily Usage Logic
     daily_trip_count = models.IntegerField(default=0)
@@ -101,6 +102,7 @@ class MonthlyRenewal(models.Model):
     valid_to = models.DateField()
     payment_status = models.CharField(max_length=10, choices=PAYMENT_STATUS_CHOICES, default='PENDING')
     renewal_id = models.CharField(max_length=50, unique=True, null=True, blank=True)
+    razorpay_order_id = models.CharField(max_length=100, null=True, blank=True, unique=True)
 
     class Meta:
         unique_together = ('main_pass', 'month')
