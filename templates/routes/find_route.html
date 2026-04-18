@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+{% block title %}Smart Route Finder - PassPro{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 1200px;">
+    <div class="flex-between mb-2">
+        <h2>🚌 Smart Public Transport Finder</h2>
+        <a href="{% url 'dashboard' %}" class="btn btn-outline">Back</a>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 400px 1fr; gap: 1.5rem;">
+        <div class="glass-card" style="padding: 1.5rem; height: fit-content; max-height: 85vh; overflow-y: auto;">
+            <div class="form-group">
+                <label>From Point / Bus No.</label>
+                <input type="text" id="origin-input" placeholder="E.g. 78 or KOYAMBEDU" class="glass-input">
+            </div>
+            <div class="form-group">
+                <label>To Point (Optional)</label>
+                <input type="text" id="destination-input" placeholder="E.g. THIRUVANMIYUR" class="glass-input">
+            </div>
+            
+            <button id="search-btn" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">🔍 Search Buses</button>
+
+            <!-- Results Section -->
+            <div id="results-section" style="margin-top: 1.5rem; display: none;">
+                <h4 style="font-size: 0.9rem; margin-bottom: 0.8rem; color: var(--text-muted);">Matching Buses</h4>
+                <div id="bus-list" style="display: flex; flex-direction: column; gap: 0.8rem;"></div>
+            </div>
+
+            <!-- Route Details (Hidden until bus selected) -->
+            <div id="route-details" style="margin-top: 1.5rem; display: none;">
+                <button onclick="backToResults()" class="btn btn-small btn-outline mb-1" style="font-size: 0.75rem;">← Back to Results</button>
+                <div id="bus-header" style="padding: 1rem; background: var(--primary); color: white; border-radius: 12px; margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between;">
+                    <div><div style="font-size: 0.7rem; opacity: 0.8;">Bus Number</div><div id="selected-bus-no" style="font-size: 1.4rem; font-weight: 800;">78</div></div>
+                    <i class="fas fa-bus" style="font-size: 1.5rem; opacity: 0.5;"></i>
+                </div>
+                
+                <div id="progress-container" style="display: none; margin-bottom: 1rem;">
+                    <div style="font-size: 0.8rem; margin-bottom: 0.4rem; color: var(--text-muted);">Geocoding route...</div>
+                    <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
+                        <div id="progress-bar" style="width: 0%; height: 100%; background: var(--primary); transition: width 0.3s ease;"></div>
+                    </div>
+                </div>
+
+                <div id="steps-list" style="display: flex; flex-direction: column; gap: 0.5rem;"></div>
+            </div>
+
+            <div id="error-message" style="margin-top: 1.5rem; display: none; padding: 1rem; background: rgba(255,0,0,0.1); border-radius: 8px; border: 1px solid rgba(255,0,0,0.2); color: #fca5a5; font-size: 0.9rem;"></div>
+        </div>
+
+        <div class="glass-card" style="padding: 0; overflow: hidden; height: 650px; position: relative; border: 1px solid var(--glass-border);">
+            <div id="map" style="width: 100%; height: 100%; background: #242f3e;"></div>
+            <div id="loading-overlay" style="position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); display:none; align-items:center; justify-content:center; z-index:1000;">
+                <div class="text-center"><div class="spinner mb-1"></div><p style="color:white;">Processing...</p></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<style>
+    .glass-input { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 8px; padding: 0.8rem; color: white; margin-top: 0.3rem; }
+    .bus-card { padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 12px; border: 1px solid var(--glass-border); cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: space-between; }
+    .bus-card:hover { background: rgba(255,255,255,0.1); border-color: var(--primary); transform: translateX(5px); }
+    .stop-item { display: flex; align-items: flex-start; gap: 0.8rem; padding: 0.6rem; border-left: 2px solid var(--glass-border); margin-left: 10px; position: relative; }
+    .stop-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--primary); position: absolute; left: -6px; top: 12px; box-shadow: 0 0 8px var(--primary); }
+    .stop-name { font-size: 0.8rem; color: #cbd5e1; }
+    .spinner { width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .map-tiles { filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%); }
+</style>
+
+<script>
+    const busRoutes = [
+        { no: "78", start: "KOYAMBEDU", end: "THIRUVANMIYUR", stops: ["M.M.D.A.COLONY", "JAFFARKHAN PET", "CIPET", "GUINDY", "ENG.COLLEGE", "ADYAR B.S.", "ADYAR DEPOT"] },
+        { no: "21G", start: "ISLAND GROUND", end: "KILAMBAKKAM", stops: ["SECRETARIAT", "CHEPAUK", "Q.M.C", "MANDAVELI", "ADYAR GATE", "KOTTURPURAM", "GUINDY", "PALLAVARAM", "TAMBARAM", "VANDALUR ZOO"] },
+        { no: "29C", start: "PERAMBUR", end: "BESANT NAGAR", stops: ["SHIVASHANMUGAPURAM", "K.M.C", "STERLING RD", "PONDY BAZAAR", "SAIDAPET", "ENG.COLLEGE", "ADYAR B.S."] },
+        { no: "47A", start: "VILLIVAKKAM", end: "THIRUVANMIYUR", stops: ["KILPAUK GARDEN", "TAYLORS ROAD", "PONDY BAZAAR", "SAIDAPET", "ENG.COLLEGE", "ADYAR B.S."] },
+        { no: "588", start: "THIRUVANMIYUR", end: "MAMALLAPURAM", stops: ["KOTTIVAKKAM", "PALAVAKKAM", "NEELANKARAI", "VETTUVANKENI", "V.G.P", "PANAIYUR", "MUTTUKKADU", "KOVALAM"] },
+        { no: "6D", start: "TOLLGATE", end: "THIRUVANMIYUR", stops: ["PERAMBUR", "EGMORE", "ANNA ROAD", "MANDAVELI", "ADYAR DEPOT"] },
+        { no: "T29", start: "THIRU.VI.KA.NAGAR", end: "THIRUVANMIYUR", stops: ["M.G.R.CENTRAL", "WESLEY H.S", "Y.M.I.A", "MANDAVELI", "ADYAR DEPOT"] },
+        { no: "A1", start: "M.G.R.CENTRAL", end: "THIRUVANMIYUR", stops: ["TAMBARAM WEST", "CHROMEPET", "PALLAVARAM", "V.G.P", "NEELANKARAI", "KOTTIVAKKAM"] },
+        { no: "99", start: "TAMBARAM WEST", end: "ADYAR B.S.", stops: ["GUDUVANCHERY", "VANDALUR ZOO", "TAMBARAM", "CHROMEPET", "KANDANCHAVADI", "THIRUVANMIYUR"] },
+        { no: "91V", start: "GUDUVANCHERY", end: "THIRUVANMIYUR", stops: ["ISLAND GROUND", "CHEPAUK", "Q.M.C", "FORESHORE ESTATE", "ADYAR DEPOT", "KOVALAM"] },
+        { no: "109", start: "ISLAND GROUND", end: "KOVALAM", stops: ["ADYAR B.S.", "THIRUVANMIYUR", "PALAVAKKAM", "NEELANKARAI", "V.G.P", "PANAIYUR", "MUTTUKKADU"] },
+        { no: "109CT", start: "ADYAR B.S.", end: "KOVALAM", stops: ["THIRUVOTRIYUR", "EGMORE", "SECRETARIAT", "CHEPAUK", "FORESHORE ESTATE", "ADYAR DEPOT", "THIRUVANMIYUR"] },
+        { no: "109T", start: "THIRUVOTRIYUR", end: "KOVALAM", stops: ["ISLAND GROUND", "CHEPAUK", "Q.M.C", "FORESHORE ESTATE", "THIRUVANMIYUR", "THIRUPORUR"] },
+        { no: "109X", start: "ISLAND GROUND", end: "THIRUPORUR", stops: ["ADYAR DEPOT", "SRP TOOLS", "THORAPAKKAM", "SHOLINGANALLUR", "PERUMBAKKAM", "KANNAGI NAGAR"] },
+        { no: "102K", start: "ISLAND GROUND", end: "KANNAGI NAGAR", stops: ["CHEPAUK", "Q.M.C", "ADYAR DEPOT", "THORAPAKKAM", "KARAPAKKAM", "SHOLINGANALLUR"] },
+        { no: "102P", start: "ISLAND GROUND", end: "PERUMPAKKAM", stops: ["CHEPAUK", "Q.M.C", "ADYAR DEPOT", "THORAPAKKAM", "KARAPAKKAM", "SHOLINGANALLUR"] }
+    ];
+
+    let map, routeLayer, markers = [];
+
+    document.addEventListener('DOMContentLoaded', () => {
+        map = L.map('map').setView([13.0827, 80.2707], 12);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { className: 'map-tiles' }).addTo(map);
+        document.getElementById('search-btn').addEventListener('click', doSearch);
+    });
+
+    function doSearch() {
+        const q1 = document.getElementById('origin-input').value.trim().toUpperCase();
+        const q2 = document.getElementById('destination-input').value.trim().toUpperCase();
+        if (!q1) { alert("Please enter at least one stop or bus number."); return; }
+
+        const matches = busRoutes.filter(r => {
+            const hasQ1 = r.no === q1 || r.start.includes(q1) || r.end.includes(q1) || r.stops.some(s => s.includes(q1));
+            if (!q2) return hasQ1;
+            const hasQ2 = r.start.includes(q2) || r.end.includes(q2) || r.stops.some(s => s.includes(q2));
+            return hasQ1 && hasQ2;
+        });
+
+        renderSearchResults(matches);
+    }
+
+    function renderSearchResults(matches) {
+        const container = document.getElementById('bus-list');
+        container.innerHTML = '';
+        document.getElementById('results-section').style.display = matches.length ? 'block' : 'none';
+        document.getElementById('error-message').style.display = matches.length ? 'none' : 'block';
+        if (!matches.length) document.getElementById('error-message').innerText = "No buses found matching your search.";
+
+        matches.forEach(m => {
+            const div = document.createElement('div');
+            div.className = 'bus-card';
+            div.innerHTML = `<div><div style="font-weight:700; color:var(--primary);">Bus ${m.no}</div><div style="font-size:0.75rem; color:var(--text-muted);">${m.start} ⇌ ${m.end}</div></div><i class="fas fa-chevron-right" style="opacity:0.3;"></i>`;
+            div.onclick = () => selectBus(m);
+            container.appendChild(div);
+        });
+        document.getElementById('route-details').style.display = 'none';
+    }
+
+    async function selectBus(bus) {
+        document.getElementById('results-section').style.display = 'none';
+        document.getElementById('route-details').style.display = 'block';
+        document.getElementById('selected-bus-no').innerText = bus.no;
+        document.getElementById('loading-overlay').style.display = 'flex';
+        document.getElementById('progress-container').style.display = 'block';
+
+        if (routeLayer) map.removeLayer(routeLayer);
+        markers.forEach(m => map.removeLayer(m));
+        markers = [];
+
+        const fullRoute = [bus.start, ...bus.stops, bus.end];
+        updateStopsList(fullRoute);
+
+        const coords = [];
+        const progressBar = document.getElementById('progress-bar');
+        for (let i = 0; i < fullRoute.length; i++) {
+            const c = await geocode(fullRoute[i] + ", Chennai");
+            if (c) { coords.push(c); markers.push(L.marker(c).addTo(map).bindPopup(fullRoute[i])); }
+            progressBar.style.width = ((i+1)/fullRoute.length*100)+'%';
+            if (i < fullRoute.length - 1) await new Promise(r => setTimeout(r, 800));
+        }
+
+        if (coords.length > 1) {
+            routeLayer = L.polyline(coords, { color: '#818cf8', weight: 4 }).addTo(map);
+            map.fitBounds(routeLayer.getBounds(), { padding: [50, 50] });
+        }
+        document.getElementById('loading-overlay').style.display = 'none';
+        document.getElementById('progress-container').style.display = 'none';
+    }
+
+    async function geocode(n) {
+        try {
+            const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(n)}&limit=1`, { headers: { 'User-Agent': 'BusPassApp/2.0' } });
+            const d = await r.json();
+            return d.length ? [parseFloat(d[0].lat), parseFloat(d[0].lon)] : null;
+        } catch(e) { return null; }
+    }
+
+    function updateStopsList(ss) {
+        const c = document.getElementById('steps-list');
+        c.innerHTML = '';
+        ss.forEach(s => {
+            const d = document.createElement('div'); d.className = 'stop-item';
+            d.innerHTML = `<div class="stop-dot"></div><div class="stop-name">${s}</div>`;
+            c.appendChild(d);
+        });
+    }
+
+    function backToResults() {
+        document.getElementById('route-details').style.display = 'none';
+        document.getElementById('results-section').style.display = 'block';
+    }
+</script>
+{% endblock %}

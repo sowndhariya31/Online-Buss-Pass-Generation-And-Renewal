@@ -72,7 +72,10 @@
                     <tr>
                         <th>User</th>
                         <th>College</th>
-                        <th>Route</th>
+                        <th>From</th>
+                        <th>To</th>
+                        <th>Photo</th>
+                        <th>ID Proof</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -81,7 +84,22 @@
                     <tr>
                         <td><strong>{{ p.user.get_full_name|default:p.user.username }}</strong></td>
                         <td>{{ p.user.college|default:"-" }}</td>
-                        <td>{{ p.user.route|default:"-" }}</td>
+                        <td>{{ p.user.route_from|default:"-" }}</td>
+                        <td>{{ p.user.route_to|default:"-" }}</td>
+                        <td>
+                            {% if p.user.photo %}
+                            <a href="{{ p.user.photo.url }}" target="_blank">
+                                <img src="{{ p.user.photo.url }}" style="height: 40px; width: 40px; border-radius: 4px; object-fit: cover; border: 1px solid rgba(255,255,255,0.1);">
+                            </a>
+                            {% else %}-{% endif %}
+                        </td>
+                        <td>
+                            {% if p.user.id_proof %}
+                            <a href="{{ p.user.id_proof.url }}" target="_blank">
+                                <img src="{{ p.user.id_proof.url }}" style="height: 40px; width: 40px; border-radius: 4px; object-fit: cover; border: 1px solid rgba(255,255,255,0.1);">
+                            </a>
+                            {% else %}-{% endif %}
+                        </td>
                         <td>
                             <div class="action-btns">
                                 <form action="{% url 'approve_pass' p.pk %}" method="post" style="display:inline;">
@@ -114,7 +132,10 @@
                     <tr>
                         <th>User</th>
                         <th>Address</th>
-                        <th>Route</th>
+                        <th>From</th>
+                        <th>To</th>
+                        <th>Photo</th>
+                        <th>ID Proof</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -123,7 +144,22 @@
                     <tr>
                         <td><strong>{{ p.user.get_full_name|default:p.user.username }}</strong></td>
                         <td>{{ p.user.address|default:"-"|truncatewords:5 }}</td>
-                        <td>{{ p.user.route|default:"-" }}</td>
+                        <td>{{ p.user.route_from|default:"-" }}</td>
+                        <td>{{ p.user.route_to|default:"-" }}</td>
+                        <td>
+                            {% if p.user.photo %}
+                            <a href="{{ p.user.photo.url }}" target="_blank">
+                                <img src="{{ p.user.photo.url }}" style="height: 40px; width: 40px; border-radius: 4px; object-fit: cover; border: 1px solid rgba(255,255,255,0.1);">
+                            </a>
+                            {% else %}-{% endif %}
+                        </td>
+                        <td>
+                            {% if p.user.id_proof %}
+                            <a href="{{ p.user.id_proof.url }}" target="_blank">
+                                <img src="{{ p.user.id_proof.url }}" style="height: 40px; width: 40px; border-radius: 4px; object-fit: cover; border: 1px solid rgba(255,255,255,0.1);">
+                            </a>
+                            {% else %}-{% endif %}
+                        </td>
                         <td>
                             <div class="action-btns">
                                 <form action="{% url 'approve_pass' p.pk %}" method="post" style="display:inline;">
@@ -173,7 +209,10 @@
                         <th>Username</th>
                         <th>Full Name</th>
                         <th>College</th>
-                        <th>Route</th>
+                        <th>From</th>
+                        <th>To</th>
+                        <th>Photo</th>
+                        <th>ID Proof</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -183,7 +222,22 @@
                         <td>{{ u.username }}</td>
                         <td>{{ u.get_full_name|default:"-" }}</td>
                         <td>{{ u.college|default:"-" }}</td>
-                        <td>{{ u.route|default:"-" }}</td>
+                        <td>{{ u.route_from|default:"-" }}</td>
+                        <td>{{ u.route_to|default:"-" }}</td>
+                        <td>
+                            {% if u.photo %}
+                            <a href="{{ u.photo.url }}" target="_blank">
+                                <img src="{{ u.photo.url }}" style="height: 40px; width: 40px; border-radius: 4px; object-fit: cover; border: 1px solid rgba(255,255,255,0.1);">
+                            </a>
+                            {% else %}-{% endif %}
+                        </td>
+                        <td>
+                            {% if u.id_proof %}
+                            <a href="{{ u.id_proof.url }}" target="_blank">
+                                <img src="{{ u.id_proof.url }}" style="height: 40px; width: 40px; border-radius: 4px; object-fit: cover; border: 1px solid rgba(255,255,255,0.1);">
+                            </a>
+                            {% else %}-{% endif %}
+                        </td>
                         <td>
                             <div class="action-btns">
                                 <a href="{% url 'edit_user' u.pk %}" class="btn bg-info-soft btn-small">Edit</a>
@@ -225,7 +279,10 @@
                     <tr>
                         <th>Username</th>
                         <th>Full Name</th>
-                        <th>Route</th>
+                        <th>From</th>
+                        <th>To</th>
+                        <th>Photo</th>
+                        <th>ID Proof</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -234,7 +291,22 @@
                     <tr>
                         <td>{{ u.username }}</td>
                         <td>{{ u.get_full_name|default:"-" }}</td>
-                        <td>{{ u.route|default:"-" }}</td>
+                        <td>{{ u.route_from|default:"-" }}</td>
+                        <td>{{ u.route_to|default:"-" }}</td>
+                        <td>
+                            {% if u.photo %}
+                            <a href="{{ u.photo.url }}" target="_blank">
+                                <img src="{{ u.photo.url }}" style="height: 40px; width: 40px; border-radius: 4px; object-fit: cover; border: 1px solid rgba(255,255,255,0.1);">
+                            </a>
+                            {% else %}-{% endif %}
+                        </td>
+                        <td>
+                            {% if u.id_proof %}
+                            <a href="{{ u.id_proof.url }}" target="_blank">
+                                <img src="{{ u.id_proof.url }}" style="height: 40px; width: 40px; border-radius: 4px; object-fit: cover; border: 1px solid rgba(255,255,255,0.1);">
+                            </a>
+                            {% else %}-{% endif %}
+                        </td>
                         <td>
                             <div class="action-btns">
                                 <a href="{% url 'edit_user' u.pk %}" class="btn bg-info-soft btn-small">Edit</a>
@@ -278,6 +350,8 @@
                         <th>User</th>
                         <th>Status</th>
                         <th>Expiry</th>
+                        <th>Photo</th>
+                        <th>ID Proof</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -288,6 +362,20 @@
                         <td>{{ p.user.username }}</td>
                         <td><span class="badge badge-{{ p.status|lower }}">{{ p.status }}</span></td>
                         <td>{{ p.expiry_date|date:"M d, Y" }}</td>
+                        <td>
+                            {% if p.user.photo %}
+                            <a href="{{ p.user.photo.url }}" target="_blank">
+                                <img src="{{ p.user.photo.url }}" style="height: 40px; width: 40px; border-radius: 4px; object-fit: cover; border: 1px solid rgba(255,255,255,0.1);">
+                            </a>
+                            {% else %}-{% endif %}
+                        </td>
+                        <td>
+                            {% if p.user.id_proof %}
+                            <a href="{{ p.user.id_proof.url }}" target="_blank">
+                                <img src="{{ p.user.id_proof.url }}" style="height: 40px; width: 40px; border-radius: 4px; object-fit: cover; border: 1px solid rgba(255,255,255,0.1);">
+                            </a>
+                            {% else %}-{% endif %}
+                        </td>
                         <td>
                             <div class="action-btns">
                                 <a href="{% url 'edit_pass' p.pk %}" class="btn bg-info-soft btn-small">Edit</a>
@@ -442,6 +530,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <div class="flex-between mb-2">
     <h2>My Bus Passes</h2>
     <div style="display: flex; gap: 0.5rem;">
+        <a href="{% url 'find_route' %}" class="btn bg-info-soft" style="color: var(--info);">🔍 Route Finder</a>
         <a href="{% url 'renew_search' %}" class="btn btn-outline">Renewal</a>
         {% if not passes %}
         <a href="{% url 'apply_pass' %}" class="btn btn-primary">+ Apply Fresh Pass</a>

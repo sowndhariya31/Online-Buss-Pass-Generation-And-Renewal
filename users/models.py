@@ -24,8 +24,8 @@ class User(AbstractUser):
     # New SRD Fields
     college = models.CharField(max_length=200, blank=True, null=True)
     address = models.TextField(blank=True, null=True)
-    route = models.CharField(max_length=100, blank=True, null=True) 
-    
+    route_from = models.CharField(max_length=100, blank=True, null=True)
+    route_to = models.CharField(max_length=100, blank=True, null=True)    
     photo = models.ImageField(upload_to='photos/', null=True, blank=True)
     id_proof = models.ImageField(upload_to='id_proofs/', null=True, blank=True)
 

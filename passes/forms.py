@@ -10,5 +10,5 @@ class ApplyPassForm(forms.ModelForm):
 class PassDetailForm(forms.ModelForm):
     class Meta:
         model = User
-        fields = ['college', 'address', 'route', 'photo', 'id_proof']
+        fields = ['college', 'address', 'route_from', 'route_to', 'photo', 'id_proof']
 

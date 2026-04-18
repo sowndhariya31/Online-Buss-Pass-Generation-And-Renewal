@@ -117,7 +117,8 @@
         form.addEventListener('submit', function (e) {
             const passType = passTypeSelect.value;
             const address = document.querySelector('[name="address"]').value.trim();
-            const route = document.querySelector('[name="route"]').value.trim();
+            const routeFrom = document.querySelector('[name="route_from"]').value.trim();
+            const routeTo = document.querySelector('[name="route_to"]').value.trim();
             const photo = document.querySelector('[name="photo"]').value;
             const idProof = document.querySelector('[name="id_proof"]').value;
 
@@ -128,7 +129,7 @@
                 if (!college) isValid = false;
             }
 
-            if (!address || !route || !photo || !idProof) {
+            if (!address || !routeFrom || !routeTo || !photo || !idProof) {
                 isValid = false;
             }
 

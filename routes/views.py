@@ -31,4 +31,10 @@ def delete_route(request, pk):
     if request.method == 'POST':
         route.delete()
         return redirect('manage_routes')
-    return render(request, 'routes/confirm_delete.html', {'route': route})
+from django.conf import settings
+
+@login_required
+def find_route(request):
+    return render(request, 'routes/find_route.html', {
+        'google_maps_api_key': settings.GOOGLE_MAPS_API_KEY
+    })

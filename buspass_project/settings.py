@@ -168,4 +168,5 @@ LOGOUT_REDIRECT_URL = 'home'
 # Razorpay Configuration
 RAZORPAY_KEY_ID = os.environ.get('RAZORPAY_KEY_ID', 'rzp_test_SdcDkdM8lCxhmw')
 RAZORPAY_KEY_SECRET = os.environ.get('RAZORPAY_KEY_SECRET', 'lRjJR7C3NZTmA9lZchrUS56N')
+GOOGLE_MAPS_API_KEY = os.environ.get('GOOGLE_MAPS_API_KEY', '')
 
