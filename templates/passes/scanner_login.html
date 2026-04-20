@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Conductor Login - CITY PASS{% endblock %}
+
+{% block content %}
+<div class="max-w-md">
+    <div class="glass-card">
+        <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 0.5rem;">
+            <img src="{% static 'images/b_logo.png' %}" alt="Logo" style="height: 50px; width: auto; transform: scale(2.4); transform-origin: center; margin-left: 10px; margin-right: -25px;">
+            <span style="font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 1.6rem; letter-spacing: 0.5px; background: linear-gradient(to right, #818cf8, #c084fc); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">CITY PASS</span>
+        </div>
+        <h3 class="text-center mb-2" style="color: var(--text-muted); font-size: 1.1rem; font-weight: 600;">Conductor Login</h3>
+        <p class="text-center" style="color: var(--text-muted); margin-bottom: 2rem;">
+            Please enter the Bus Number and Password to access the Conductor Scanner.
+        </p>
+
+        {% if error %}
+        <div style="background: rgba(239, 68, 68, 0.1); padding: 1rem; border-radius: 8px; border: 1px solid var(--danger); margin-bottom: 1.5rem; color: var(--danger); text-align: center;">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <form method="post" action="{% url 'scanner' %}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="login">
+            
+            <div class="form-group">
+                <label>Bus Number</label>
+                <input type="text" name="bus_number" class="glass-input" placeholder="e.g. 78" required style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 8px; padding: 0.8rem; color: white;">
+            </div>
+
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" name="password" class="glass-input" placeholder="Enter Conductor Password" required style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 8px; padding: 0.8rem; color: white;">
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Open Scanner</button>
+        </form>
+        
+        <a href="{% url 'dashboard' %}" class="btn btn-outline" style="width: 100%; margin-top: 1rem;">Back to Dashboard</a>
+    </div>
+</div>
+{% endblock %}

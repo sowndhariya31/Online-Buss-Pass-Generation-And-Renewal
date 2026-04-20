@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
 
-{% block title %}Register - Online Bus Pass Generation And Renewal{% endblock %}
+{% block title %}Register - CITY PASS{% endblock %}
 
 {% block content %}
 <div class="max-w-md">
     <div class="glass-card">
-        <h2 class="text-center mb-2">Create Account</h2>
+        <h2 class="text-center mb-2 brand-text" style="font-size: 2.2rem;">Create Account</h2>
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
             {% for field in form %}

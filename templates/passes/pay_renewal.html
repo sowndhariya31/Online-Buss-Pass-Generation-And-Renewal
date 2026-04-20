@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Pay Renewal - PassPro{% endblock %}
+{% block title %}Pay Renewal - CITY PASS{% endblock %}
 
 {% block content %}
 <div class="max-w-md">
@@ -53,7 +53,7 @@
                 "key": "{{ razorpay_merchant_key }}",
                 "amount": "{{ razorpay_amount }}",
                 "currency": "{{ currency }}",
-                "name": "PassPro Renewal",
+                "name": "CITY PASS Renewal",
                 "description": "Bus Pass Renewal Fee for {{ renewal.month }}",
                 "order_id": "{{ razorpay_order_id }}",
                 "callback_url": "{{ callback_url }}",
@@ -63,7 +63,7 @@
                     "contact": "{{ user.phone|default:'' }}"
                 },
                 "notes": {
-                    "address": "PassPro Headquarters",
+                    "address": "CITY PASS Headquarters",
                     "renewal_id": "{{ renewal.id }}"
                 },
                 "theme": {
@@ -78,7 +78,7 @@
         </script>
 
         <p class="text-center mt-2" style="font-size: 0.8rem; color: var(--text-muted);">
-            🔒 Secured by PassPro Payment Gateway
+            🔒 Secured by CITY PASS Payment Gateway
         </p>
     </div>
 </div>

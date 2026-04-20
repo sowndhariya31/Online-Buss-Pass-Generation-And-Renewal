@@ -46,9 +46,16 @@ body {
 .nav-brand {
     font-size: 1.8rem;
     font-weight: 800;
-    background: linear-gradient(to right, #081ede, #6907cc);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+}
+
+.brand-text {
+    font-family: 'Pacifico', cursive;
+    color: #ffffff;
+    text-shadow: 
+        2px 2px 0px #333333,
+        4px 4px 5px rgba(0,0,0,0.5);
+    letter-spacing: 1px;
+    font-weight: 400;
 }
 
 .nav-links a {

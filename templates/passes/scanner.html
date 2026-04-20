@@ -1,14 +1,22 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}Conductor Scanner - Online Bus Pass Generation And Renewal{% endblock %}
+{% block title %}Conductor Scanner - CITY PASS{% endblock %}
 
 {% block content %}
 <div class="max-w-md">
     <div class="glass-card text-center">
-        <h2 class="mb-2" style="display: flex; align-items: center; justify-content: center; gap: 10px;">
-            <img src="{% static 'images/logo.jpeg' %}" alt="Logo" style="height: 40px; width: auto; border-radius: 5px;">
-            Conductor Scanner
-        </h2>
+        <div style="display: flex; justify-content: flex-end; margin-bottom: 1rem;">
+            <form method="post" action="{% url 'scanner' %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="logout">
+                <button type="submit" class="btn btn-outline" style="padding: 0.3rem 0.6rem; font-size: 0.8rem; border-color: var(--danger); color: var(--danger);">Logout Bus {{ bus_number }}</button>
+            </form>
+        </div>
+        <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 0.5rem;">
+            <img src="{% static 'images/b_logo.png' %}" alt="Logo" style="height: 50px; width: auto; transform: scale(2.4); transform-origin: center; margin-left: 10px; margin-right: -25px;">
+            <span style="font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 1.6rem; letter-spacing: 0.5px; background: linear-gradient(to right, #818cf8, #c084fc); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">CITY PASS</span>
+        </div>
+        <h3 class="text-center mb-2" style="color: var(--text-muted); font-size: 1.1rem; font-weight: 600;">Conductor Scanner (Bus: {{ bus_number }})</h3>
         <p style="color: var(--text-muted); margin-bottom: 2rem;">Scan QR or Enter Pass ID to validate travel.</p>
 
         <div id="scanner-input">
@@ -188,7 +196,8 @@
                 },
                 body: JSON.stringify({
                     main_pass_id: passId,
-                    device_id: 'CONDUCTOR_WEB_01'
+                    device_id: 'CONDUCTOR_WEB_01',
+                    bus_number: '{{ bus_number }}'
                 })
             });
 

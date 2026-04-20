@@ -6,8 +6,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Bus Pass System{% endblock %}</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=2.6">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=2.7">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Pacifico&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
@@ -15,9 +15,9 @@
     <nav class="glass-nav">
         <div class="nav-brand">
             <a href="{% url 'home' %}"
-                style="text-decoration: none; background: linear-gradient(to right, #818cf8, #c084fc); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; display: flex; align-items: center; gap: 10px;">
-                <img src="{% static 'images/logo.jpeg' %}" alt="Logo" style="height: 40px; width: auto; border-radius: 5px;">
-                Online Bus Pass Generation And Renewal</a>
+                style="text-decoration: none; display: flex; align-items: center; gap: 10px;">
+                <img src="{% static 'images/b_logo.png' %}" alt="Logo" style="height: 50px; width: auto; transform: scale(2.4); transform-origin: center; margin-left: 10px; margin-right: -25px;">
+                <span class="brand-text" style="font-size: 1.8rem;">CITY PASS</span></a>
         </div>
         <div class="nav-links">
             {% if user.is_authenticated %}

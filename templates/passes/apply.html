@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Apply Bus Pass - PassPro{% endblock %}
+{% block title %}Apply Bus Pass - CITY PASS{% endblock %}
 
 {% block content %}
 <div class="max-w-md">
@@ -63,7 +63,71 @@
                     <button type="submit" class="btn btn-primary" style="flex: 2;">Submit Application</button>
                 </div>
             </div>
+            </div>
         </form>
+
+        <datalist id="route-suggestions">
+            <option value="M.G.R.KOYAMBEDU">
+            <option value="THIRUVANMIYUR">
+            <option value="M.M.D.A.COLONY">
+            <option value="JAFFARKHAN PET">
+            <option value="CIPET">
+            <option value="GUINDY">
+            <option value="ENG.COLLEGE">
+            <option value="ADYAR B.S.">
+            <option value="ADYAR DEPOT">
+            <option value="ISLAND GROUND">
+            <option value="KILAMBAKKAM">
+            <option value="SECRETARIAT">
+            <option value="CHEPAUK">
+            <option value="Q.M.C">
+            <option value="MANDAVELI">
+            <option value="ADYAR GATE">
+            <option value="KOTTURPURAM">
+            <option value="PALLAVARAM">
+            <option value="CHROMEPET">
+            <option value="TAMBARAM">
+            <option value="VANDALUR ZOO">
+            <option value="PERAMBUR">
+            <option value="BESANT NAGAR">
+            <option value="SHIVASHANMUGAPURAM">
+            <option value="K.M.C">
+            <option value="STERLING RD">
+            <option value="PONDY BAZAAR">
+            <option value="SAIDAPET">
+            <option value="VILLIVAKKAM">
+            <option value="KILPAUK GARDEN">
+            <option value="TAYLORS ROAD">
+            <option value="MAMALLAPURAM">
+            <option value="KOTTIVAKKAM">
+            <option value="PALAVAKKAM">
+            <option value="NEELANKARAI">
+            <option value="VETTUVANKENI">
+            <option value="V.G.P">
+            <option value="PANAIYUR">
+            <option value="MUTTUKKADU">
+            <option value="KOVALAM">
+            <option value="TOLLGATE">
+            <option value="EGMORE">
+            <option value="ANNA ROAD">
+            <option value="THIRU.VI.KA.NAGAR">
+            <option value="M.G.R.CENTRAL">
+            <option value="WESLEY H.S">
+            <option value="Y.M.I.A">
+            <option value="TAMBARAM WEST">
+            <option value="PERUNGALATHUR">
+            <option value="KANDANCHAVADI">
+            <option value="GUDUVANCHERY">
+            <option value="FORESHORE ESTATE">
+            <option value="THIRUVOTRIYUR">
+            <option value="THIRUPORUR">
+            <option value="SRP TOOLS">
+            <option value="THORAPAKKAM">
+            <option value="SHOLINGANALLUR">
+            <option value="PERUMBAKKAM">
+            <option value="KANNAGI NAGAR">
+            <option value="KARAPAKKAM">
+        </datalist>
 
         <a href="{% url 'dashboard' %}" class="btn btn-outline" id="dashboard-link"
             style="width: 100%; margin-top: 1rem;">Back to Dashboard</a>
@@ -72,6 +136,11 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        const routeFrom = document.querySelector('[name="route_from"]');
+        const routeTo = document.querySelector('[name="route_to"]');
+        if (routeFrom) routeFrom.setAttribute('list', 'route-suggestions');
+        if (routeTo) routeTo.setAttribute('list', 'route-suggestions');
+
         const form = document.getElementById('apply-form');
         const step1 = document.getElementById('step-1');
         const step2 = document.getElementById('step-2');

@@ -283,7 +283,26 @@ def scanner_view(request):
     # Admin/Staff/Conductor can access the scanner
     if not (request.user.role in ['ADMIN', 'CONDUCTOR'] or request.user.is_superuser or request.user.is_staff):
         return redirect('dashboard')
-    return render(request, 'passes/scanner.html')
+        
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'login':
+            bus_number = request.POST.get('bus_number', '').strip().upper()
+            password = request.POST.get('password', '')
+            if bus_number and password == 'Conductor2722':
+                request.session['logged_in_bus_number'] = bus_number
+                return redirect('scanner')
+            else:
+                return render(request, 'passes/scanner_login.html', {'error': 'Invalid Bus Number or Password'})
+        elif action == 'logout':
+            if 'logged_in_bus_number' in request.session:
+                del request.session['logged_in_bus_number']
+            return redirect('scanner')
+            
+    if 'logged_in_bus_number' not in request.session:
+        return render(request, 'passes/scanner_login.html')
+        
+    return render(request, 'passes/scanner.html', {'bus_number': request.session['logged_in_bus_number']})
 
 @login_required
 def download_id_card(request, pk):

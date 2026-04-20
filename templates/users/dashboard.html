@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Dashboard - Online Bus Pass Generation And Renewal{% endblock %}
+{% block title %}Dashboard - CITY PASS{% endblock %}
 
 {% block content %}
 {% if is_admin %}
@@ -528,7 +528,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <hr style="margin: 3rem 0; border-color: var(--glass-border);">
 
 <div class="flex-between mb-2">
-    <h2>My Bus Passes</h2>
+    <h2 class="brand-text" style="font-size: 2.5rem;">My Bus Passes</h2>
     <div style="display: flex; gap: 0.5rem;">
         <a href="{% url 'find_route' %}" class="btn bg-info-soft" style="color: var(--info);">🔍 Route Finder</a>
         <a href="{% url 'renew_search' %}" class="btn btn-outline">Renewal</a>
