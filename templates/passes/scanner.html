@@ -12,9 +12,9 @@
                 <button type="submit" class="btn btn-outline" style="padding: 0.3rem 0.6rem; font-size: 0.8rem; border-color: var(--danger); color: var(--danger);">Logout Bus {{ bus_number }}</button>
             </form>
         </div>
-        <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 0.5rem;">
+        <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 0.5rem; transform: scale(0.9);">
             <img src="{% static 'images/b_logo.png' %}" alt="Logo" style="height: 50px; width: auto; transform: scale(2.4); transform-origin: center; margin-left: 10px; margin-right: -25px;">
-            <span style="font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 1.6rem; letter-spacing: 0.5px; background: linear-gradient(to right, #818cf8, #c084fc); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">CITY PASS</span>
+            <span class="brand-text" style="font-size: 1.8rem;">CITY PASS</span>
         </div>
         <h3 class="text-center mb-2" style="color: var(--text-muted); font-size: 1.1rem; font-weight: 600;">Conductor Scanner (Bus: {{ bus_number }})</h3>
         <p style="color: var(--text-muted); margin-bottom: 2rem;">Scan QR or Enter Pass ID to validate travel.</p>

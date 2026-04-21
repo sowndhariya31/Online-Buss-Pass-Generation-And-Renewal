@@ -67,6 +67,7 @@
         <h3 class="tab-section-title">🎓 Pending Student Applications</h3>
         {% if pending_student_passes %}
         <div class="glass-card mt-2 mb-2" style="padding: 1.5rem;">
+        <div class="table-responsive">
             <table class="glass-table">
                 <thead>
                     <tr>
@@ -115,6 +116,7 @@
                 </tbody>
             </table>
         </div>
+        </div>
         {% else %}
         <div class="glass-card text-center mt-2" style="padding: 2.5rem;">
             <p style="color: var(--text-muted); font-size: 1.05rem;">✅ No pending student applications.</p>
@@ -127,6 +129,7 @@
         <h3 class="tab-section-title">👤 Pending Public Applications</h3>
         {% if pending_public_passes %}
         <div class="glass-card mt-2 mb-2" style="padding: 1.5rem;">
+        <div class="table-responsive">
             <table class="glass-table">
                 <thead>
                     <tr>
@@ -175,6 +178,7 @@
                 </tbody>
             </table>
         </div>
+        </div>
         {% else %}
         <div class="glass-card text-center mt-2" style="padding: 2.5rem;">
             <p style="color: var(--text-muted); font-size: 1.05rem;">✅ No pending public applications.</p>
@@ -203,6 +207,7 @@
             </div>
         </div>
         <div class="glass-card mt-2" style="padding: 1.5rem;">
+        <div class="table-responsive">
             <table class="glass-table">
                 <thead>
                     <tr>
@@ -251,6 +256,7 @@
                 </tbody>
             </table>
         </div>
+        </div>
     </div>
 
     <!-- Tab: Public Users -->
@@ -274,6 +280,7 @@
             </div>
         </div>
         <div class="glass-card mt-2" style="padding: 1.5rem;">
+        <div class="table-responsive">
             <table class="glass-table">
                 <thead>
                     <tr>
@@ -320,6 +327,7 @@
                 </tbody>
             </table>
         </div>
+        </div>
     </div>
 
     <!-- Tab: All Passes -->
@@ -343,6 +351,7 @@
             </div>
         </div>
         <div class="glass-card mt-2" style="padding: 1.5rem;">
+        <div class="table-responsive">
             <table class="glass-table">
                 <thead>
                     <tr>
@@ -389,12 +398,14 @@
                 </tbody>
             </table>
         </div>
+        </div>
     </div>
 
     <!-- Tab: Usage Logs -->
     <div class="admin-tab-panel" id="tab-usage-logs">
         <h3 class="tab-section-title">📋 Recent Usage Logs</h3>
         <div class="glass-card mt-2" style="padding: 1.2rem;">
+        <div class="table-responsive">
             <table class="glass-table" style="font-size: 0.85rem;">
                 <thead>
                     <tr>
@@ -415,6 +426,7 @@
                     {% endfor %}
                 </tbody>
             </table>
+        </div>
         </div>
     </div>
 </div>
@@ -540,94 +552,96 @@ document.addEventListener('DOMContentLoaded', function() {
 
 {% if passes %}
 <div class="glass-card" style="padding: 1.5rem;">
-    <table class="glass-table">
-        <thead>
-            <tr>
-                <th>Pass ID</th>
-                <th>Type</th>
-                <th>Issue Date</th>
-                <th>Expiry Date</th>
-                <th>Status</th>
-                <th>Valid Until</th>
-                <th>Daily Usage</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for p in passes %}
-            <tr>
-                <td>{{ p.main_pass_id|default:"(Pending)" }}</td>
-                <td>{{ p.pass_type }}</td>
-                <td>{{ p.issue_date|date:"M d, Y" }}</td>
-                <td>{{ p.expiry_date|date:"M d, Y" }}</td>
-                <td>
-                    {% if p.status == 'ACTIVE' %}
-                    {% if p.is_currently_valid %}
-                    <span class="badge badge-success">ACTIVE</span>
-                    {% else %}
-                    <span class="badge badge-warning">RENEWAL REQ</span>
-                    {% endif %}
-                    {% else %}
-                    <span class="badge badge-{{ p.status|lower }}">{{ p.status }}</span>
-                    {% endif %}
-                </td>
-                <td>
-                    {% if p.current_valid_to %}
-                    <span
-                        style="color: {% if p.is_currently_valid %}var(--success){% else %}var(--danger){% endif %}; font-weight: 600;">
-                        {{ p.current_valid_to|date:"M d, Y" }}
-                    </span>
-                    {% else %}
-                    <span style="color: var(--text-muted);">No Renewal</span>
-                    {% endif %}
-                </td>
-                <td>
-                    {% if p.status == 'ACTIVE' %}
-                    <strong style="color: var(--primary);">{{ p.daily_trip_count }}</strong>
-                    {% if p.pass_type == 'STUDENT' %}/ 2{% endif %}
-                    <br><small style="color: var(--text-muted);">{% if p.last_used_date %}{{ p.last_used_date|date:"M d" }}{% else %}Never{% endif %}</small>
-                    {% else %}
-                    -
-                    {% endif %}
-                </td>
-                <td>
-                    {% if p.status == 'ACTIVE' %}
-                    {% if p.payment_status != 'PAID' %}
-                    <a href="{% url 'pay_pass' p.pk %}" class="btn btn-primary"
-                        style="padding: 0.4rem 0.8rem; font-size:0.85rem;">Pay Initial Fee</a>
-                    {% else %}
-                    {# Check for pending monthly renewal #}
-                    {% with current_renewal=p.renewals.all.last %}
-                    {% if current_renewal and current_renewal.payment_status == 'PENDING' %}
-                    <a href="{% url 'pay_pass' p.pk %}" class="btn btn-warning"
-                        style="padding: 0.4rem 0.8rem; font-size:0.85rem;">Pay Monthly Fee</a>
-                    {% elif p.is_currently_valid %}
-                    <a href="{% url 'download_pass' p.pk %}" class="btn btn-success"
-                        style="padding: 0.4rem 0.8rem; font-size:0.85rem;">Scan QR / Download</a>
-                    {% endif %}
-                    {% endwith %}
-                    {% endif %}
-                    <a href="{% url 'renew_pass' p.pk %}" class="btn btn-outline"
-                        style="padding: 0.4rem 0.8rem; font-size:0.85rem;">Renew / Extend</a>
+    <div class="table-responsive">
+        <table class="glass-table">
+            <thead>
+                <tr>
+                    <th>Pass ID</th>
+                    <th>Type</th>
+                    <th>Issue Date</th>
+                    <th>Expiry Date</th>
+                    <th>Status</th>
+                    <th>Valid Until</th>
+                    <th>Daily Usage</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in passes %}
+                <tr>
+                    <td>{{ p.main_pass_id|default:"(Pending)" }}</td>
+                    <td>{{ p.pass_type }}</td>
+                    <td>{{ p.issue_date|date:"M d, Y" }}</td>
+                    <td>{{ p.expiry_date|date:"M d, Y" }}</td>
+                    <td>
+                        {% if p.status == 'ACTIVE' %}
+                        {% if p.is_currently_valid %}
+                        <span class="badge badge-success">ACTIVE</span>
+                        {% else %}
+                        <span class="badge badge-warning">RENEWAL REQ</span>
+                        {% endif %}
+                        {% else %}
+                        <span class="badge badge-{{ p.status|lower }}">{{ p.status }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if p.current_valid_to %}
+                        <span
+                            style="color: {% if p.is_currently_valid %}var(--success){% else %}var(--danger){% endif %}; font-weight: 600;">
+                            {{ p.current_valid_to|date:"M d, Y" }}
+                        </span>
+                        {% else %}
+                        <span style="color: var(--text-muted);">No Renewal</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if p.status == 'ACTIVE' %}
+                        <strong style="color: var(--primary);">{{ p.daily_trip_count }}</strong>
+                        {% if p.pass_type == 'STUDENT' %}/ 2{% endif %}
+                        <br><small style="color: var(--text-muted);">{% if p.last_used_date %}{{ p.last_used_date|date:"M d" }}{% else %}Never{% endif %}</small>
+                        {% else %}
+                        -
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if p.status == 'ACTIVE' %}
+                        {% if p.payment_status != 'PAID' %}
+                        <a href="{% url 'pay_pass' p.pk %}" class="btn btn-primary"
+                            style="padding: 0.4rem 0.8rem; font-size:0.85rem;">Pay Initial Fee</a>
+                        {% else %}
+                        {# Check for pending monthly renewal #}
+                        {% with current_renewal=p.renewals.all.last %}
+                        {% if current_renewal and current_renewal.payment_status == 'PENDING' %}
+                        <a href="{% url 'pay_pass' p.pk %}" class="btn btn-warning"
+                            style="padding: 0.4rem 0.8rem; font-size:0.85rem;">Pay Monthly Fee</a>
+                        {% elif p.is_currently_valid %}
+                        <a href="{% url 'download_pass' p.pk %}" class="btn btn-success"
+                            style="padding: 0.4rem 0.8rem; font-size:0.85rem;">Scan QR / Download</a>
+                        {% endif %}
+                        {% endwith %}
+                        {% endif %}
+                        <a href="{% url 'renew_pass' p.pk %}" class="btn btn-outline"
+                            style="padding: 0.4rem 0.8rem; font-size:0.85rem;">Renew / Extend</a>
 
-                    {% if p.main_pass_id and p.payment_status == 'PAID' %}
-                    <a href="{% url 'download_id_card' p.pk %}" class="btn btn-info"
-                        style="padding: 0.4rem 0.8rem; font-size:0.85rem;">ID Card</a>
-                    {% endif %}
-                    {% elif p.status == 'PENDING' %}
-                    <span
-                        style="color: var(--primary); font-weight: 600; display: block; margin-bottom: 0.5rem;">Awaiting
-                        Admin Approval</span>
-                    {% elif p.status == 'BLOCKED' %}
-                    <span
-                        style="color: var(--danger); font-weight: 600; display: block; margin-bottom: 0.5rem;">Application
-                        Rejected</span>
-                    {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+                        {% if p.main_pass_id and p.payment_status == 'PAID' %}
+                        <a href="{% url 'download_id_card' p.pk %}" class="btn btn-info"
+                            style="padding: 0.4rem 0.8rem; font-size:0.85rem;">ID Card</a>
+                        {% endif %}
+                        {% elif p.status == 'PENDING' %}
+                        <span
+                            style="color: var(--primary); font-weight: 600; display: block; margin-bottom: 0.5rem;">Awaiting
+                            Admin Approval</span>
+                        {% elif p.status == 'BLOCKED' %}
+                        <span
+                            style="color: var(--danger); font-weight: 600; display: block; margin-bottom: 0.5rem;">Application
+                            Rejected</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <div class="glass-card mt-2" style="padding: 1.5rem;">
