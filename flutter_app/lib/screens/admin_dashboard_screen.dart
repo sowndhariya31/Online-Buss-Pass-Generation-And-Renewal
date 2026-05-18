@@ -99,73 +99,95 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> with Single
             ),
           ),
           SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(40.0),
-              child: Column(
-                children: [
-                  // Stats Cards
-                  Row(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final bool isMobile = constraints.maxWidth < 800;
+                final double contentPadding = isMobile ? 16.0 : 40.0;
+                return Padding(
+                  padding: EdgeInsets.all(contentPadding),
+                  child: Column(
                     children: [
-                      _buildStatCard(
-                        count: pendingStudents.length.toString(),
-                        label: 'Pending Student',
-                        subText: 'Active: ${allPasses.where((p) => p.status == 'ACTIVE' && p.passType == 'STUDENT').length} | Revenue: ₹${allPasses.where((p) => p.status == 'ACTIVE' && p.passType == 'STUDENT').length * 280}',
-                        color: Color(0xFF6366F1),
+                      // Stats Cards
+                      if (isMobile) ...[
+                        _buildStatCard(
+                          count: pendingStudents.length.toString(),
+                          label: 'Pending Student',
+                          subText: 'Active: ${allPasses.where((p) => p.status == 'ACTIVE' && p.passType == 'STUDENT').length} | Revenue: ₹${allPasses.where((p) => p.status == 'ACTIVE' && p.passType == 'STUDENT').length * 280}',
+                          color: Color(0xFF6366F1),
+                        ),
+                        SizedBox(height: 16),
+                        _buildStatCard(
+                          count: pendingPublic.length.toString(),
+                          label: 'Pending Public',
+                          subText: 'Active: ${allPasses.where((p) => p.status == 'ACTIVE' && p.passType == 'PUBLIC').length} | Revenue: ₹${allPasses.where((p) => p.status == 'ACTIVE' && p.passType == 'PUBLIC').length * 1000}',
+                          color: Color(0xFF10B981),
+                        ),
+                      ] else ...[
+                        Row(
+                          children: [
+                            _buildStatCard(
+                              count: pendingStudents.length.toString(),
+                              label: 'Pending Student',
+                              subText: 'Active: ${allPasses.where((p) => p.status == 'ACTIVE' && p.passType == 'STUDENT').length} | Revenue: ₹${allPasses.where((p) => p.status == 'ACTIVE' && p.passType == 'STUDENT').length * 280}',
+                              color: Color(0xFF6366F1),
+                            ),
+                            SizedBox(width: 24),
+                            _buildStatCard(
+                              count: pendingPublic.length.toString(),
+                              label: 'Pending Public',
+                              subText: 'Active: ${allPasses.where((p) => p.status == 'ACTIVE' && p.passType == 'PUBLIC').length} | Revenue: ₹${allPasses.where((p) => p.status == 'ACTIVE' && p.passType == 'PUBLIC').length * 1000}',
+                              color: Color(0xFF10B981),
+                            ),
+                          ],
+                        ),
+                      ],
+                      SizedBox(height: isMobile ? 24 : 40),
+                      // Tab Bar
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.3),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: Colors.white10),
+                        ),
+                        child: TabBar(
+                          controller: _tabController,
+                          isScrollable: true,
+                          indicator: BoxDecoration(
+                            color: Color(0xFF6366F1).withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Color(0xFF6366F1).withOpacity(0.5)),
+                          ),
+                          labelColor: Colors.white,
+                          unselectedLabelColor: Colors.white54,
+                          tabs: [
+                            _buildTab('🎓 Pending Student', pendingStudents.length),
+                            _buildTab('👤 Pending Public', pendingPublic.length),
+                            _buildTab('🎓 Student Users', passProvider.studentUsers.length),
+                            _buildTab('👤 Public Users', passProvider.publicUsers.length),
+                            _buildTab('🎫 All Passes', allPasses.length),
+                            _buildTab('📝 Audit Logs', passProvider.auditLogs.length),
+                          ],
+                        ),
                       ),
-                      SizedBox(width: 24),
-                      _buildStatCard(
-                        count: pendingPublic.length.toString(),
-                        label: 'Pending Public',
-                        subText: 'Active: ${allPasses.where((p) => p.status == 'ACTIVE' && p.passType == 'PUBLIC').length} | Revenue: ₹${allPasses.where((p) => p.status == 'ACTIVE' && p.passType == 'PUBLIC').length * 1000}',
-                        color: Color(0xFF10B981),
+                      SizedBox(height: 32),
+                      // Tab Content
+                      Expanded(
+                        child: TabBarView(
+                          controller: _tabController,
+                          children: [
+                            _buildApplicationsTable(pendingStudents, passProvider),
+                            _buildApplicationsTable(pendingPublic, passProvider),
+                            _buildUsersTable(passProvider.studentUsers, isStudent: true),
+                            _buildUsersTable(passProvider.publicUsers, isStudent: false),
+                            _buildAllPassesTable(allPasses),
+                            _buildAuditLogsTable(passProvider.auditLogs),
+                          ],
+                        ),
                       ),
                     ],
                   ),
-                  SizedBox(height: 40),
-                  // Tab Bar
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.3),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.white10),
-                    ),
-                    child: TabBar(
-                      controller: _tabController,
-                      isScrollable: true,
-                      indicator: BoxDecoration(
-                        color: Color(0xFF6366F1).withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Color(0xFF6366F1).withOpacity(0.5)),
-                      ),
-                      labelColor: Colors.white,
-                      unselectedLabelColor: Colors.white54,
-                      tabs: [
-                        _buildTab('🎓 Pending Student', pendingStudents.length),
-                        _buildTab('👤 Pending Public', pendingPublic.length),
-                        _buildTab('🎓 Student Users', passProvider.studentUsers.length),
-                        _buildTab('👤 Public Users', passProvider.publicUsers.length),
-                        _buildTab('🎫 All Passes', allPasses.length),
-                        _buildTab('📝 Audit Logs', passProvider.auditLogs.length),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 32),
-                  // Tab Content
-                  Expanded(
-                    child: TabBarView(
-                      controller: _tabController,
-                      children: [
-                        _buildApplicationsTable(pendingStudents, passProvider),
-                        _buildApplicationsTable(pendingPublic, passProvider),
-                        _buildUsersTable(passProvider.studentUsers, isStudent: true),
-                        _buildUsersTable(passProvider.publicUsers, isStudent: false),
-                        _buildAllPassesTable(allPasses),
-                        _buildAuditLogsTable(passProvider.auditLogs),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+                );
+              },
             ),
           ),
         ],
@@ -174,30 +196,35 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> with Single
   }
 
   Widget _buildStatCard({required String count, required String label, required String subText, required Color color}) {
-    return Expanded(
-      child: Container(
-        padding: EdgeInsets.all(32),
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: color.withOpacity(0.3)),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [color.withOpacity(0.1), Colors.transparent],
-          ),
-        ),
-        child: Column(
-          children: [
-            Text(count, style: GoogleFonts.outfit(color: Colors.white, fontSize: 48, fontWeight: FontWeight.bold)),
-            SizedBox(height: 8),
-            Text(label, style: GoogleFonts.outfit(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600)),
-            SizedBox(height: 12),
-            Text(subText, style: TextStyle(color: Colors.white54, fontSize: 14)),
-          ],
+    final bool isMobile = MediaQuery.of(context).size.width < 800;
+    final cardContent = Container(
+      padding: EdgeInsets.all(isMobile ? 20 : 32),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: color.withOpacity(0.3)),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [color.withOpacity(0.1), Colors.transparent],
         ),
       ),
+      child: Column(
+        children: [
+          Text(count, style: GoogleFonts.outfit(color: Colors.white, fontSize: isMobile ? 36 : 48, fontWeight: FontWeight.bold)),
+          SizedBox(height: 8),
+          Text(label, style: GoogleFonts.outfit(color: Colors.white, fontSize: isMobile ? 15 : 18, fontWeight: FontWeight.w600)),
+          SizedBox(height: 8),
+          Text(subText, style: TextStyle(color: Colors.white54, fontSize: isMobile ? 12 : 14), textAlign: TextAlign.center),
+        ],
+      ),
     );
+
+    if (isMobile) {
+      return SizedBox(width: double.infinity, child: cardContent);
+    } else {
+      return Expanded(child: cardContent);
+    }
   }
 
   Tab _buildTab(String label, int count) {
@@ -222,81 +249,99 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> with Single
   }
 
   Widget _buildApplicationsTable(List<BusPass> apps, PassProvider provider) {
+    final bool isMobile = MediaQuery.of(context).size.width < 800;
     return Container(
-      padding: EdgeInsets.all(32),
+      padding: EdgeInsets.all(isMobile ? 16 : 32),
       decoration: BoxDecoration(
         color: Colors.black.withOpacity(0.4),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(color: Colors.white10),
       ),
-      child: Column(
-        children: [
-          Row(
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        physics: BouncingScrollPhysics(),
+        child: SizedBox(
+          width: 950,
+          child: Column(
             children: [
-              _headerCell('USER', 2.0),
-              _headerCell('COLLEGE / ADDRESS', 2.0),
-              _headerCell('ROUTE (FROM → TO)', 2.5),
-              _headerCell('DOCUMENTS', 1.5),
-              _headerCell('ACTIONS', 2.0),
+              Row(
+                children: [
+                  _headerCell('USER', 2.0),
+                  _headerCell('COLLEGE / ADDRESS', 2.0),
+                  _headerCell('ROUTE (FROM → TO)', 2.5),
+                  _headerCell('DOCUMENTS', 1.5),
+                  _headerCell('ACTIONS', 2.0),
+                ],
+              ),
+              Divider(color: Colors.white10, height: isMobile ? 20 : 40),
+              Expanded(
+                child: apps.isEmpty
+                    ? Center(child: Text('No pending applications', style: TextStyle(color: Colors.white24)))
+                    : ListView.builder(
+                        physics: BouncingScrollPhysics(),
+                        itemCount: apps.length,
+                        itemBuilder: (context, index) => _buildAppRow(apps[index], provider),
+                      ),
+              ),
             ],
           ),
-          Divider(color: Colors.white10, height: 40),
-          Expanded(
-            child: apps.isEmpty
-                ? Center(child: Text('No pending applications', style: TextStyle(color: Colors.white24)))
-                : ListView.builder(
-                    itemCount: apps.length,
-                    itemBuilder: (context, index) => _buildAppRow(apps[index], provider),
-                  ),
-          ),
-        ],
+        ),
       ),
     );
   }
 
   Widget _buildAllPassesTable(List<BusPass> passes) {
+    final bool isMobile = MediaQuery.of(context).size.width < 800;
     return Container(
-      padding: EdgeInsets.all(32),
+      padding: EdgeInsets.all(isMobile ? 16 : 32),
       decoration: BoxDecoration(
         color: Colors.black.withOpacity(0.4),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(color: Colors.white10),
       ),
-      child: Column(
-        children: [
-          Row(
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        physics: BouncingScrollPhysics(),
+        child: SizedBox(
+          width: 850,
+          child: Column(
             children: [
-              _headerCell('PASS ID', 1.5),
-              _headerCell('USER', 2.0),
-              _headerCell('TYPE', 1.0),
-              _headerCell('STATUS', 1.0),
-              _headerCell('ISSUED ON', 1.5),
-              _headerCell('EXPIRY', 1.5),
+              Row(
+                children: [
+                  _headerCell('PASS ID', 1.5),
+                  _headerCell('USER', 2.0),
+                  _headerCell('TYPE', 1.0),
+                  _headerCell('STATUS', 1.0),
+                  _headerCell('ISSUED ON', 1.5),
+                  _headerCell('EXPIRY', 1.5),
+                ],
+              ),
+              Divider(color: Colors.white10, height: isMobile ? 20 : 40),
+              Expanded(
+                child: ListView.builder(
+                  physics: BouncingScrollPhysics(),
+                  itemCount: passes.length,
+                  itemBuilder: (context, index) {
+                    final p = passes[index];
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12.0),
+                      child: Row(
+                        children: [
+                          _dataCell(p.passId.isEmpty ? '(Pending)' : p.passId, 1.5),
+                          _dataCell(p.username ?? 'No Name', 2.0),
+                          _dataCell(p.passType, 1.0),
+                          _dataCell(p.status, 1.0, color: p.status == 'ACTIVE' ? Colors.greenAccent : Colors.orangeAccent),
+                          _dataCell(p.issueDate.toString().substring(0, 10), 1.5),
+                          _dataCell(p.expiryDate.toString().substring(0, 10), 1.5),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
             ],
           ),
-          Divider(color: Colors.white10, height: 40),
-          Expanded(
-            child: ListView.builder(
-              itemCount: passes.length,
-              itemBuilder: (context, index) {
-                final p = passes[index];
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 12.0),
-                  child: Row(
-                    children: [
-                      _dataCell(p.passId.isEmpty ? '(Pending)' : p.passId, 1.5),
-                      _dataCell(p.username ?? 'No Name', 2.0),
-                      _dataCell(p.passType, 1.0),
-                      _dataCell(p.status, 1.0, color: p.status == 'ACTIVE' ? Colors.greenAccent : Colors.orangeAccent),
-                      _dataCell(p.issueDate.toString().substring(0, 10), 1.5),
-                      _dataCell(p.expiryDate.toString().substring(0, 10), 1.5),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -443,99 +488,117 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> with Single
   }
 
   Widget _buildUsersTable(List<User> users, {bool isStudent = true}) {
+    final bool isMobile = MediaQuery.of(context).size.width < 800;
     return Container(
-      padding: EdgeInsets.all(32),
+      padding: EdgeInsets.all(isMobile ? 16 : 32),
       decoration: BoxDecoration(
         color: Colors.black.withOpacity(0.4),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(color: Colors.white10),
       ),
-      child: Column(
-        children: [
-          Row(
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        physics: BouncingScrollPhysics(),
+        child: SizedBox(
+          width: 950,
+          child: Column(
             children: [
-              _headerCell('USERNAME', 2.0),
-              _headerCell('EMAIL', 2.5),
-              _headerCell('PHONE NUMBER', 2.0),
-              _headerCell('ROUTE (FROM ⇌ TO)', 3.0),
-              if (isStudent) _headerCell('COLLEGE', 2.5),
+              Row(
+                children: [
+                  _headerCell('USERNAME', 2.0),
+                  _headerCell('EMAIL', 2.5),
+                  _headerCell('PHONE NUMBER', 2.0),
+                  _headerCell('ROUTE (FROM ⇌ TO)', 3.0),
+                  if (isStudent) _headerCell('COLLEGE', 2.5),
+                ],
+              ),
+              Divider(color: Colors.white10, height: isMobile ? 20 : 40),
+              Expanded(
+                child: users.isEmpty
+                    ? Center(child: Text('No users registered', style: TextStyle(color: Colors.white24)))
+                    : ListView.builder(
+                        physics: BouncingScrollPhysics(),
+                        itemCount: users.length,
+                        itemBuilder: (context, index) {
+                          final u = users[index];
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 12.0),
+                            child: Row(
+                              children: [
+                                _dataCell(u.username, 2.0, color: Colors.white),
+                                _dataCell(u.email, 2.5),
+                                _dataCell(u.phoneNumber, 2.0),
+                                _dataCell('${u.routeFrom ?? '-'} ⇌ ${u.routeTo ?? '-'}', 3.0, color: Colors.greenAccent),
+                                if (isStudent) _dataCell(u.college ?? 'N/A', 2.5),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+              ),
             ],
           ),
-          Divider(color: Colors.white10, height: 40),
-          Expanded(
-            child: users.isEmpty
-                ? Center(child: Text('No users registered', style: TextStyle(color: Colors.white24)))
-                : ListView.builder(
-                    itemCount: users.length,
-                    itemBuilder: (context, index) {
-                      final u = users[index];
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 12.0),
-                        child: Row(
-                          children: [
-                            _dataCell(u.username, 2.0, color: Colors.white),
-                            _dataCell(u.email, 2.5),
-                            _dataCell(u.phoneNumber, 2.0),
-                            _dataCell('${u.routeFrom ?? '-'} ⇌ ${u.routeTo ?? '-'}', 3.0, color: Colors.greenAccent),
-                            if (isStudent) _dataCell(u.college ?? 'N/A', 2.5),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-          ),
-        ],
+        ),
       ),
     );
   }
 
   Widget _buildAuditLogsTable(List<Map<String, dynamic>> logs) {
+    final bool isMobile = MediaQuery.of(context).size.width < 800;
     return Container(
-      padding: EdgeInsets.all(32),
+      padding: EdgeInsets.all(isMobile ? 16 : 32),
       decoration: BoxDecoration(
         color: Colors.black.withOpacity(0.4),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(color: Colors.white10),
       ),
-      child: Column(
-        children: [
-          Row(
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        physics: BouncingScrollPhysics(),
+        child: SizedBox(
+          width: 850,
+          child: Column(
             children: [
-              _headerCell('LOG ID', 1.0),
-              _headerCell('PASS ID', 2.0),
-              _headerCell('USER (EMAIL)', 3.0),
-              _headerCell('SCAN TIME', 2.5),
-              _headerCell('TRIP NO.', 1.5),
+              Row(
+                children: [
+                  _headerCell('LOG ID', 1.0),
+                  _headerCell('PASS ID', 2.0),
+                  _headerCell('USER (EMAIL)', 3.0),
+                  _headerCell('SCAN TIME', 2.5),
+                  _headerCell('TRIP NO.', 1.5),
+                ],
+              ),
+              Divider(color: Colors.white10, height: isMobile ? 20 : 40),
+              Expanded(
+                child: logs.isEmpty
+                    ? Center(child: Text('No audit logs registered yet', style: TextStyle(color: Colors.white24)))
+                    : ListView.builder(
+                        physics: BouncingScrollPhysics(),
+                        itemCount: logs.length,
+                        itemBuilder: (context, index) {
+                          final log = logs[index];
+                          String formattedTime = log['time'] ?? '-';
+                          if (formattedTime.length >= 19) {
+                            formattedTime = formattedTime.substring(0, 19).replaceAll('T', ' ');
+                          }
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 12.0),
+                            child: Row(
+                              children: [
+                                _dataCell(log['id'].toString(), 1.0),
+                                _dataCell(log['pass_id'] ?? '-', 2.0, color: Colors.blueAccent),
+                                _dataCell(log['user'] ?? '-', 3.0, color: Colors.white),
+                                _dataCell(formattedTime, 2.5),
+                                _dataCell('Trip ${log['trip']}', 1.5, color: Colors.orangeAccent),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+              ),
             ],
           ),
-          Divider(color: Colors.white10, height: 40),
-          Expanded(
-            child: logs.isEmpty
-                ? Center(child: Text('No audit logs registered yet', style: TextStyle(color: Colors.white24)))
-                : ListView.builder(
-                    itemCount: logs.length,
-                    itemBuilder: (context, index) {
-                      final log = logs[index];
-                      String formattedTime = log['time'] ?? '-';
-                      if (formattedTime.length >= 19) {
-                        formattedTime = formattedTime.substring(0, 19).replaceAll('T', ' ');
-                      }
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 12.0),
-                        child: Row(
-                          children: [
-                            _dataCell(log['id'].toString(), 1.0),
-                            _dataCell(log['pass_id'] ?? '-', 2.0, color: Colors.blueAccent),
-                            _dataCell(log['user'] ?? '-', 3.0, color: Colors.white),
-                            _dataCell(formattedTime, 2.5),
-                            _dataCell('Trip ${log['trip']}', 1.5, color: Colors.orangeAccent),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-          ),
-        ],
+        ),
       ),
     );
   }
