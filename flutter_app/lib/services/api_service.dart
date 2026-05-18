@@ -5,13 +5,9 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
-  // Local network IP for physical device connection
+  // Render production network
   static String get baseUrl {
-    // For physical Android devices, use the PC's local IP address and port 8080
-    if (!kIsWeb && Platform.isAndroid) {
-      return 'http://192.168.1.34:8080/api';
-    }
-    return 'http://127.0.0.1:8080/api';
+    return 'https://online-buss-pass-generation-and-renewal.onrender.com/api';
   }
 
   static Future<String?> getToken() async {
