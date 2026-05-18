@@ -9,7 +9,7 @@
     </div>
 
     <div class="grid-2" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));">
-        <div class="glass-card" style="padding: 1.5rem; height: fit-content; max-height: 85vh; overflow-y: auto;">
+        <div class="glass-card route-search-card" style="padding: 1.5rem; height: fit-content; max-height: 85vh; overflow-y: auto;">
             <div class="form-group">
                 <label>From Point / Bus No.</label>
                 <input type="text" id="origin-input" placeholder="E.g. 78 or KOYAMBEDU" class="glass-input" {% if conductor_bus_no %}value="{{ conductor_bus_no }}" readonly{% endif %}>
@@ -48,7 +48,7 @@
             <div id="error-message" style="margin-top: 1.5rem; display: none; padding: 1rem; background: rgba(255,0,0,0.1); border-radius: 8px; border: 1px solid rgba(255,0,0,0.2); color: #fca5a5; font-size: 0.9rem;"></div>
         </div>
 
-        <div class="glass-card" style="padding: 0; overflow: hidden; min-height: 400px; height: 65vh; position: relative; border: 1px solid var(--glass-border);">
+        <div class="glass-card route-map-card" style="padding: 0; overflow: hidden; min-height: 400px; height: 65vh; position: relative; border: 1px solid var(--glass-border);">
             <div id="map" style="width: 100%; height: 100%; background: #242f3e;"></div>
             <div id="loading-overlay" style="position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); display:none; align-items:center; justify-content:center; z-index:1000;">
                 <div class="text-center"><div class="spinner mb-1"></div><p style="color:white;">Processing...</p></div>
@@ -70,6 +70,17 @@
     .spinner { width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     .map-tiles { filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%); }
+
+    @media (max-width: 768px) {
+        .route-search-card {
+            max-height: none !important;
+            overflow-y: visible !important;
+        }
+        .route-map-card {
+            height: 350px !important;
+            min-height: 300px !important;
+        }
+    }
 </style>
 
 <script>

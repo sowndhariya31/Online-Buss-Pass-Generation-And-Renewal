@@ -522,7 +522,7 @@ input[type="file"] {
     }
 
     .glass-table {
-        min-width: 600px; /* Ensure table doesn't squish too much */
+        min-width: 850px; /* Ensure table doesn't squish too much */
     }
 
     /* Form Adjustments */
