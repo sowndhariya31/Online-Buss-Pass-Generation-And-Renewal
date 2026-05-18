@@ -206,35 +206,42 @@ class __HomeContentState extends State<_HomeContent> {
                           children: [
                             Container(
                               width: double.infinity,
-                              padding: EdgeInsets.all(32),
+                              padding: EdgeInsets.all(24),
                               decoration: BoxDecoration(
                                 color: Colors.black.withOpacity(0.4),
                                 borderRadius: BorderRadius.circular(24),
                                 border: Border.all(color: Colors.white10),
                               ),
-                              child: Column(
-                                children: [
-                                  Row(
+                              child: SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                physics: BouncingScrollPhysics(),
+                                child: SizedBox(
+                                  width: 950,
+                                  child: Column(
                                     children: [
-                                      _headerCell('PASS ID', 1),
-                                      _headerCell('TYPE', 1),
-                                      _headerCell('ISSUE DATE', 1.5),
-                                      _headerCell('EXPIRY DATE', 1.5),
-                                      _headerCell('STATUS', 1),
-                                      _headerCell('VALID UNTIL', 1.5),
-                                      _headerCell('DAILY USAGE', 1),
-                                      _headerCell('ACTION', 2),
+                                      Row(
+                                        children: [
+                                          _headerCell('PASS ID', 1),
+                                          _headerCell('TYPE', 1),
+                                          _headerCell('ISSUE DATE', 1.5),
+                                          _headerCell('EXPIRY DATE', 1.5),
+                                          _headerCell('STATUS', 1),
+                                          _headerCell('VALID UNTIL', 1.5),
+                                          _headerCell('DAILY USAGE', 1),
+                                          _headerCell('ACTION', 2),
+                                        ],
+                                      ),
+                                      Divider(color: Colors.white10, height: 40),
+                                      if (_passes.isEmpty)
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(vertical: 40.0),
+                                          child: Text('No active passes found', style: TextStyle(color: Colors.white38)),
+                                        )
+                                      else
+                                        ..._passes.map((p) => _buildPassRow(p, user)).toList(),
                                     ],
                                   ),
-                                  Divider(color: Colors.white10, height: 40),
-                                  if (_passes.isEmpty)
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(vertical: 40.0),
-                                      child: Text('No active passes found', style: TextStyle(color: Colors.white38)),
-                                    )
-                                  else
-                                    ..._passes.map((p) => _buildPassRow(p, user)).toList(),
-                                ],
+                                ),
                               ),
                             ),
                             SizedBox(height: 32),
