@@ -12,9 +12,9 @@
         <div class="glass-card" style="padding: 1.5rem; height: fit-content; max-height: 85vh; overflow-y: auto;">
             <div class="form-group">
                 <label>From Point / Bus No.</label>
-                <input type="text" id="origin-input" placeholder="E.g. 78 or KOYAMBEDU" class="glass-input">
+                <input type="text" id="origin-input" placeholder="E.g. 78 or KOYAMBEDU" class="glass-input" {% if conductor_bus_no %}value="{{ conductor_bus_no }}" readonly{% endif %}>
             </div>
-            <div class="form-group">
+            <div class="form-group" {% if conductor_bus_no %}style="display:none;"{% endif %}>
                 <label>To Point (Optional)</label>
                 <input type="text" id="destination-input" placeholder="E.g. THIRUVANMIYUR" class="glass-input">
             </div>
@@ -98,12 +98,20 @@
         map = L.map('map').setView([13.0827, 80.2707], 12);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { className: 'map-tiles' }).addTo(map);
         document.getElementById('search-btn').addEventListener('click', doSearch);
+        {% if conductor_bus_no %}
+        doSearch();
+        {% endif %}
     });
 
     function doSearch() {
+        {% if conductor_bus_no %}
+        const q1 = "{{ conductor_bus_no }}".trim().toUpperCase();
+        const q2 = "";
+        {% else %}
         const q1 = document.getElementById('origin-input').value.trim().toUpperCase();
         const q2 = document.getElementById('destination-input').value.trim().toUpperCase();
         if (!q1) { alert("Please enter at least one stop or bus number."); return; }
+        {% endif %}
 
         const matches = busRoutes.filter(r => {
             const hasQ1 = r.no === q1 || r.start.includes(q1) || r.end.includes(q1) || r.stops.some(s => s.includes(q1));

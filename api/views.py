@@ -76,6 +76,14 @@ def scan_pass(request):
         if main_pass.pass_type == 'STUDENT':
             # Route Validation
             if bus_number:
+                # Bus Number Match Check
+                pass_bus_number = main_pass.user.bus_number.strip().upper() if main_pass.user.bus_number else ""
+                if pass_bus_number and pass_bus_number != bus_number:
+                    return JsonResponse({
+                        "status": "error", 
+                        "message": f"Bus Mismatch! Your pass is only valid for Bus {pass_bus_number}, but you scanned on Bus {bus_number}."
+                    }, status=403)
+                
                 bus_route = next((r for r in BUS_ROUTES if r['no'].upper() == bus_number), None)
                 if not bus_route:
                     return JsonResponse({"status": "error", "message": f"Bus {bus_number} not found in predefined valid routes!"}, status=403)

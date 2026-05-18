@@ -35,6 +35,13 @@ from django.conf import settings
 
 @login_required
 def find_route(request):
+    conductor_bus_no = None
+    if request.user.role == 'CONDUCTOR':
+        conductor_bus_no = request.user.bus_number
+    elif 'logged_in_bus_number' in request.session:
+        conductor_bus_no = request.session['logged_in_bus_number']
+        
     return render(request, 'routes/find_route.html', {
-        'google_maps_api_key': settings.GOOGLE_MAPS_API_KEY
+        'google_maps_api_key': settings.GOOGLE_MAPS_API_KEY,
+        'conductor_bus_no': conductor_bus_no
     })

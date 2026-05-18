@@ -297,7 +297,7 @@ def scanner_view(request):
         if action == 'login':
             bus_number = request.POST.get('bus_number', '').strip().upper()
             password = request.POST.get('password', '')
-            if bus_number and password == 'Conductor2722':
+            if bus_number and password.lower() == 'conductor2722':
                 request.session['logged_in_bus_number'] = bus_number
                 return redirect('scanner')
             else:
