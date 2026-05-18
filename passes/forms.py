@@ -5,7 +5,7 @@ from users.models import User
 class ApplyPassForm(forms.ModelForm):
     class Meta:
         model = MainPass
-        fields = ['pass_type']
+        fields = []
 
 class PassDetailForm(forms.ModelForm):
     class Meta:

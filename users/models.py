@@ -11,7 +11,7 @@ class User(AbstractUser):
     
     # Enforce uniqueness on email and phone
     email = models.EmailField(unique=True)
-    phone = models.CharField(max_length=15, unique=True, blank=False, null=False)
+    phone = models.CharField(max_length=10, unique=True, blank=False, null=False)
     
     # Allow duplicate usernames (using email as login identifier instead)
     username = models.CharField(max_length=150, unique=False)
@@ -20,6 +20,8 @@ class User(AbstractUser):
     REQUIRED_FIELDS = ['username', 'phone']
     
     role = models.CharField(max_length=15, choices=ROLE_CHOICES, default='STUDENT')
+    bus_number = models.CharField(max_length=20, blank=True, null=True)
+    bus_route = models.CharField(max_length=100, blank=True, null=True)
     
     # New SRD Fields
     college = models.CharField(max_length=200, blank=True, null=True)

@@ -30,13 +30,13 @@ def apply_pass(request):
             # Update User Profile
             user = detail_form.save()
             
-            # Update Role if not already set or if explicitly chosen
-            pass_type = pass_form.cleaned_data['pass_type']
+            # Default to STUDENT for everyone as requested
+            pass_type = 'STUDENT'
             user.role = pass_type
             user.save()
             
             # Create Main Pass
-            expiry_date = timezone.now().date() + datetime.timedelta(days=365 if pass_type == 'STUDENT' else 30)
+            expiry_date = timezone.now().date() + datetime.timedelta(days=365)
             
             MainPass.objects.create(
                 user=request.user,
@@ -54,9 +54,8 @@ def apply_pass(request):
         'detail_form': detail_form
     })
 
-@login_required
 def renew_pass(request, pk):
-    main_pass = get_object_or_404(MainPass, pk=pk, user=request.user)
+    main_pass = get_object_or_404(MainPass, pk=pk)
     
     if request.method == 'POST':
         month_str = request.POST.get('month')
@@ -121,17 +120,22 @@ def download_pass(request, pk):
         'qr_code': qr_code
     })
 
-@login_required
 def pay_pass(request, pk):
-    main_pass = get_object_or_404(MainPass, pk=pk, user=request.user)
+    main_pass = get_object_or_404(MainPass, pk=pk)
     
     # Only allow payment if admin has approved (status is ACTIVE)
     if main_pass.status != 'ACTIVE':
-        return redirect('dashboard')
+        return render(request, 'passes/payment_status.html', {
+            'status': 'PENDING_APPROVAL',
+            'message': 'Your pass is currently pending admin approval. Please wait for the admin to approve before paying.'
+        })
     
     # Skip if already paid
     if main_pass.payment_status == 'PAID':
-        return redirect('dashboard')
+        return render(request, 'passes/payment_status.html', {
+            'status': 'PAID',
+            'message': 'Payment already completed successfully! You can close this tab and return to the City Pass app.'
+        })
         
     amount_rupees = 280 if main_pass.pass_type == 'STUDENT' else 1000
     
@@ -158,20 +162,23 @@ def pay_pass(request, pk):
         'razorpay_merchant_key': settings.RAZORPAY_KEY_ID,
         'razorpay_amount': amount_paise,
         'currency': currency,
+        'user': main_pass.user,
         'callback_url': request.build_absolute_uri('/passes/paymenthandler/')
     }
     
     return render(request, 'passes/pay.html', context=context)
 
 
-@login_required
 def pay_renewal(request, pk):
-    renewal = get_object_or_404(MonthlyRenewal, pk=pk, main_pass__user=request.user)
+    renewal = get_object_or_404(MonthlyRenewal, pk=pk)
     main_pass = renewal.main_pass
     
     # Skip if already paid
     if renewal.payment_status == 'PAID':
-        return redirect('dashboard')
+        return render(request, 'passes/payment_status.html', {
+            'status': 'PAID',
+            'message': 'Payment already completed successfully! You can close this tab and return to the City Pass app.'
+        })
     
     amount_rupees = 280 if main_pass.pass_type == 'STUDENT' else 1000
     
@@ -199,6 +206,7 @@ def pay_renewal(request, pk):
         'razorpay_merchant_key': settings.RAZORPAY_KEY_ID,
         'razorpay_amount': amount_paise,
         'currency': currency,
+        'user': main_pass.user,
         'callback_url': request.build_absolute_uri('/passes/paymenthandler/')
     }
     

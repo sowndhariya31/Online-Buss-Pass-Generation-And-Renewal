@@ -49,6 +49,26 @@ class MainPass(models.Model):
             
         return True
 
+    @property
+    def active_renewal_id(self):
+        from django.utils import timezone
+        today = timezone.now().date()
+        current_month = today.strftime('%b').upper()
+        renewal = self.renewals.filter(month=current_month, payment_status='PAID').first()
+        if renewal:
+            return renewal.renewal_id
+        return None
+
+    @property
+    def active_renewal_month(self):
+        from django.utils import timezone
+        today = timezone.now().date()
+        current_month = today.strftime('%b').upper()
+        renewal = self.renewals.filter(month=current_month, payment_status='PAID').first()
+        if renewal:
+            return renewal.month
+        return None
+
     def generate_pass_id(self):
         """Generate and assign a unique pass ID. Call only after payment."""
         if self.main_pass_id:

@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download CITY PASS Mobile App</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --primary: #10b981;
+            --primary-hover: #059669;
+            --primary-glow: rgba(16, 185, 129, 0.3);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #3b82f6;
+            --accent-glow: rgba(59, 130, 246, 0.25);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated Ambient Background Gradients */
+        body::before {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);
+            top: -100px;
+            right: -100px;
+            z-index: 0;
+            pointer-events: none;
+            filter: blur(40px);
+        }
+
+        body::after {
+            content: '';
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+            bottom: -150px;
+            left: -150px;
+            z-index: 0;
+            pointer-events: none;
+            filter: blur(50px);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 520px;
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 2.5rem 2rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 
+                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            text-align: center;
+            position: relative;
+            z-index: 1;
+            transform: translateY(0);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .logo-container {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.25);
+        }
+
+        .logo-icon {
+            width: 42px;
+            height: 42px;
+            fill: white;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff 60%, #cbd5e1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            font-weight: 400;
+            line-height: 1.5;
+        }
+
+        /* Download Button */
+        .btn-download {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            width: 100%;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            text-decoration: none;
+            padding: 1.1rem 2rem;
+            border-radius: 16px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4),
+                        0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .btn-download:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(16, 185, 129, 0.5),
+                        0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        }
+
+        .btn-download:active {
+            transform: translateY(1px);
+        }
+
+        .btn-icon {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+        }
+
+        .file-info {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 0.75rem;
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+        }
+
+        .file-info span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Steps Section */
+        .steps-container {
+            margin-top: 2.5rem;
+            text-align: left;
+            border-top: 1px solid var(--border-color);
+            padding-top: 2rem;
+        }
+
+        .steps-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .step-item {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 1.25rem;
+        }
+
+        .step-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .step-number {
+            width: 28px;
+            height: 28px;
+            background: rgba(59, 130, 246, 0.15);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+
+        .step-content {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .step-header {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .step-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        footer {
+            margin-top: 2rem;
+            font-size: 0.8rem;
+            color: rgba(148, 163, 184, 0.5);
+            z-index: 1;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 480px) {
+            .container {
+                padding: 2rem 1.25rem;
+            }
+            h1 {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="logo-container" style="background: transparent; border: none; box-shadow: none;">
+            <img src="images/b_logo.png?v=2" alt="City Pass Logo" style="height: 80px; width: auto; transform: scale(2.2); transform-origin: center;">
+        </div>
+
+        <h1>CITY PASS</h1>
+        <p class="subtitle">Download and install the CITY PASS mobile app to manage, verify, and renew your bus passes on the go.</p>
+
+        <!-- Download Link -->
+        <a href="app-release.apk" class="btn-download" download="citypass.apk">
+            <!-- Android Logo SVG -->
+            <svg class="btn-icon" viewBox="0 0 24 24">
+                <path d="M6 18c0 .55.45 1 1 1h1v3c0 .55.45 1 1 1s1-.45 1-1v-3h4v3c0 .55.45 1 1 1s1-.45 1-1v-3h1c.55 0 1-.45 1-1V8H6v10zM12 2C9.24 2 7 4.24 7 7h10c0-2.76-2.24-5-5-5zm-3.5 8c-.83 0-1.5-.67-1.5-1.5S7.67 5 8.5 5s1.5.67 1.5 1.5S9.33 10 8.5 10zm7 0c-.83 0-1.5-.67-1.5-1.5S14.67 5 15.5 5s1.5.67 1.5 1.5S16.33 10 15.5 10z" />
+            </svg>
+            Download CITY PASS (APK)
+        </a>
+
+        <div class="file-info">
+            <span>
+                <strong>Size:</strong> ~66.5 MB
+            </span>
+            <span>
+                <strong>Format:</strong> Android APK
+            </span>
+        </div>
+
+        <!-- How to Install Steps -->
+        <div class="steps-container">
+            <div class="steps-title">
+                <svg width="18" height="18" fill="#10b981" viewBox="0 0 24 24" style="flex-shrink:0;">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                </svg>
+                How to Install on Your Android Device
+            </div>
+            
+            <div class="step-item">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <div class="step-header">Download the APK File</div>
+                    <div class="step-desc">Tap the green download button above. If prompted by your browser, tap <strong>"Download anyway"</strong>.</div>
+                </div>
+            </div>
+
+            <div class="step-item">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <div class="step-header">Enable Unknown Sources</div>
+                    <div class="step-desc">If installing for the first time, go to Settings &rarr; Apps &rarr; Special access &rarr; Install unknown apps, select your browser/file manager, and toggle on <strong>"Allow from this source"</strong>.</div>
+                </div>
+            </div>
+
+            <div class="step-item">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <div class="step-header">Install & Launch</div>
+                    <div class="step-desc">Open your <strong>Downloads</strong> folder or file manager, tap <strong>app-release.apk</strong>, and click <strong>"Install"</strong>. Enjoy the app!</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        &copy; 2026 CITY PASS Generation and Renewal System. All rights reserved.
+    </footer>
+
+</body>
+</html>
