@@ -456,6 +456,11 @@ input[type="file"] {
 
 /* Mobile Adjustments (Phones) */
 @media (max-width: 768px) {
+    .nav-logo {
+        height: 45px !important;
+        width: 45px !important;
+    }
+
     .glass-nav {
         padding: 0.8rem 1.5rem;
         flex-direction: row; 
@@ -545,11 +550,12 @@ input[type="file"] {
 
 /* Extra Small Devices */
 @media (max-width: 480px) {
-    .nav-brand img {
-        height: 40px !important;
+    .nav-logo {
+        height: 38px !important;
+        width: 38px !important;
     }
     
     .brand-text {
-        font-size: 1.3rem !important;
+        font-size: 1.25rem !important;
     }
 }
