@@ -90,7 +90,7 @@ class __HomeContentState extends State<_HomeContent> {
         child: AppBar(
           backgroundColor: Color(0xFF1E293B).withOpacity(0.95),
           elevation: 0,
-          leadingWidth: 120,
+          leadingWidth: 70,
           leading: Padding(
             padding: const EdgeInsets.all(8.0),
             child: Image.asset('assets/b_logo.png', height: 40),
@@ -98,47 +98,31 @@ class __HomeContentState extends State<_HomeContent> {
           title: Text(
             'CITY PASS',
             style: GoogleFonts.outfit(
-              fontSize: 24,
+              fontSize: 22,
               fontWeight: FontWeight.bold,
               color: Color(0xFFA78BFA),
             ),
           ),
           actions: [
-            TextButton(
+            IconButton(
+              icon: Icon(Icons.home, color: Colors.white, size: 24),
+              tooltip: 'Home',
               onPressed: () {
                 _fetchPasses();
               },
-              child: Text('Home', style: TextStyle(color: Colors.white, fontSize: 16)),
             ),
             IconButton(
-              icon: Icon(Icons.refresh, color: Color(0xFFA78BFA)),
-              tooltip: 'Refresh Passes',
+              icon: Icon(Icons.logout, color: Colors.redAccent, size: 24),
+              tooltip: 'Logout',
               onPressed: () {
-                _fetchPasses();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Checking latest payment and pass statuses...'))
+                Provider.of<AuthProvider>(context, listen: false).logout();
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (context) => LoginScreen()),
+                  (route) => false,
                 );
               },
             ),
-            SizedBox(width: 16),
-            Container(
-              margin: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-              child: ElevatedButton(
-                onPressed: () {
-                  Provider.of<AuthProvider>(context, listen: false).logout();
-                  Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(builder: (context) => LoginScreen()),
-                    (route) => false,
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.transparent,
-                  side: BorderSide(color: Colors.white24),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                ),
-                child: Text('Logout', style: TextStyle(color: Colors.white)),
-              ),
-            ),
+            SizedBox(width: 8),
           ],
         ),
       ),
@@ -157,100 +141,118 @@ class __HomeContentState extends State<_HomeContent> {
             child: RefreshIndicator(
               color: Color(0xFF6366F1),
               onRefresh: _fetchPasses,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(height: 100),
-                    Container(height: 1, color: Colors.white10),
-                    SizedBox(height: 24),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('My Bus Passes', style: GoogleFonts.outfit(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold)),
-                        Row(
-                          children: [
-                            _buildHeaderButton('Route Finder', () => Navigator.push(context, MaterialPageRoute(builder: (context) => RouteFinderScreen()))),
-                            SizedBox(width: 12),
-                            _buildHeaderButton('Renewal', () {
-                              try {
-                                final activePass = _passes.firstWhere(
-                                  (p) => p.status == 'ACTIVE',
-                                );
-                                _showRenewalMonthSelector(context, activePass);
-                              } catch (_) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('No active bus pass found to renew!')),
-                                );
-                              }
-                            }),
-                            SizedBox(width: 12),
-                            ElevatedButton(
-                              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => ApplyPassScreen())),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Color(0xFF6366F1),
-                                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 18),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                              ),
-                              child: Text('+ Apply Fresh Pass', style: TextStyle(fontWeight: FontWeight.bold)),
+              child: SingleChildScrollView(
+                physics: AlwaysScrollableScrollPhysics(),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(height: 100),
+                      Container(height: 1, color: Colors.white10),
+                      SizedBox(height: 24),
+                      Wrap(
+                        spacing: 16,
+                        runSpacing: 16,
+                        alignment: WrapAlignment.start,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          Text(
+                            'My Bus Passes',
+                            style: GoogleFonts.outfit(
+                              color: Colors.white,
+                              fontSize: 26,
+                              fontWeight: FontWeight.bold,
                             ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 32),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        child: Column(
-                          children: [
-                            Container(
-                              width: double.infinity,
-                              padding: EdgeInsets.all(24),
-                              decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.4),
-                                borderRadius: BorderRadius.circular(24),
-                                border: Border.all(color: Colors.white10),
-                              ),
-                              child: SingleChildScrollView(
-                                scrollDirection: Axis.horizontal,
-                                physics: BouncingScrollPhysics(),
-                                child: SizedBox(
-                                  width: 950,
-                                  child: Column(
-                                    children: [
-                                      Row(
-                                        children: [
-                                          _headerCell('PASS ID', 1),
-                                          _headerCell('TYPE', 1),
-                                          _headerCell('ISSUE DATE', 1.5),
-                                          _headerCell('EXPIRY DATE', 1.5),
-                                          _headerCell('STATUS', 1),
-                                          _headerCell('VALID UNTIL', 1.5),
-                                          _headerCell('DAILY USAGE', 1),
-                                          _headerCell('ACTION', 2),
-                                        ],
-                                      ),
-                                      Divider(color: Colors.white10, height: 40),
-                                      if (_passes.isEmpty)
-                                        Padding(
-                                          padding: const EdgeInsets.symmetric(vertical: 40.0),
-                                          child: Text('No active passes found', style: TextStyle(color: Colors.white38)),
-                                        )
-                                      else
-                                        ..._passes.map((p) => _buildPassRow(p, user)).toList(),
-                                    ],
-                                  ),
+                          ),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            children: [
+                              _buildHeaderButton(
+                                'Route Finder',
+                                () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => RouteFinderScreen()),
                                 ),
                               ),
+                              _buildHeaderButton(
+                                'Renewal',
+                                () {
+                                  try {
+                                    final activePass = _passes.firstWhere(
+                                      (p) => p.status == 'ACTIVE',
+                                    );
+                                    _showRenewalMonthSelector(context, activePass);
+                                  } catch (_) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('No active bus pass found to renew!')),
+                                    );
+                                  }
+                                },
+                              ),
+                              ElevatedButton(
+                                onPressed: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => ApplyPassScreen()),
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Color(0xFF6366F1),
+                                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                ),
+                                child: Text('+ Apply Fresh Pass', style: TextStyle(fontWeight: FontWeight.bold)),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 32),
+                      Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.4),
+                          borderRadius: BorderRadius.circular(24),
+                          border: Border.all(color: Colors.white10),
+                        ),
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          physics: BouncingScrollPhysics(),
+                          child: SizedBox(
+                            width: 950,
+                            child: Column(
+                              children: [
+                                Row(
+                                  children: [
+                                    _headerCell('PASS ID', 1),
+                                    _headerCell('TYPE', 1),
+                                    _headerCell('ISSUE DATE', 1.5),
+                                    _headerCell('EXPIRY DATE', 1.5),
+                                    _headerCell('STATUS', 1),
+                                    _headerCell('VALID UNTIL', 1.5),
+                                    _headerCell('DAILY USAGE', 1),
+                                    _headerCell('ACTION', 2),
+                                  ],
+                                ),
+                                Divider(color: Colors.white10, height: 40),
+                                if (_passes.isEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 40.0),
+                                    child: Text('No active passes found', style: TextStyle(color: Colors.white38)),
+                                  )
+                                else
+                                  ..._passes.map((p) => _buildPassRow(p, user)).toList(),
+                              ],
                             ),
-                            SizedBox(height: 32),
-                            _buildRecentRenewalsSection(),
-                          ],
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                      SizedBox(height: 32),
+                      _buildRecentRenewalsSection(),
+                    ],
+                  ),
                 ),
               ),
             ),
