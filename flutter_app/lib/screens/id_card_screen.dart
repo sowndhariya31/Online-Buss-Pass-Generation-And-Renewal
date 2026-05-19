@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:screenshot/screenshot.dart';
+import 'package:gal/gal.dart';
 import '../models/bus_pass.dart';
 import '../models/user.dart';
 
 class IDCardScreen extends StatelessWidget {
   final BusPass pass;
   final User? user;
+  final ScreenshotController screenshotController = ScreenshotController();
 
   IDCardScreen({required this.pass, this.user});
 
@@ -82,7 +85,9 @@ class IDCardScreen extends StatelessWidget {
                     ),
                     
                     // Main Bus Pass Premium Card
-                    Container(
+                    Screenshot(
+                      controller: screenshotController,
+                      child: Container(
                       width: double.infinity,
                       constraints: BoxConstraints(maxWidth: 460),
                       padding: EdgeInsets.all(28),
@@ -318,6 +323,7 @@ class IDCardScreen extends StatelessWidget {
                         ],
                       ),
                     ),
+                    ),
                     SizedBox(height: 24),
                     
                     // Action Buttons Row Underneath
@@ -328,14 +334,27 @@ class IDCardScreen extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           ElevatedButton.icon(
-                            onPressed: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('Preparing print job...'),
-                                  behavior: SnackBarBehavior.floating,
-                                  backgroundColor: Color(0xFF6366F1),
-                                ),
-                              );
+                            onPressed: () async {
+                              try {
+                                final image = await screenshotController.capture();
+                                if (image != null) {
+                                  await Gal.putImageBytes(image);
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('🎉 ID Card saved to local gallery!'),
+                                        backgroundColor: Colors.green,
+                                      ),
+                                    );
+                                  }
+                                }
+                              } catch (e) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('Failed to save ID Card: $e'), backgroundColor: Colors.red),
+                                  );
+                                }
+                              }
                             },
                             icon: Icon(Icons.print, size: 16, color: Colors.white),
                             label: Text(

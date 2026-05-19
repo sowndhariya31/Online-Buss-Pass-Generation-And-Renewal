@@ -12,6 +12,8 @@ import 'route_finder_screen.dart';
 import 'apply_pass_screen.dart';
 import 'profile_screen.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:screenshot/screenshot.dart';
+import 'package:gal/gal.dart';
 
 import 'admin_dashboard_screen.dart';
 import 'conductor_dashboard_screen.dart';
@@ -944,6 +946,7 @@ class __HomeContentState extends State<_HomeContent> {
   }
 
   void _showQRCodeDialog(BuildContext context, BusPass p) {
+    final screenshotController = ScreenshotController();
     showDialog(
       context: context,
       barrierDismissible: true,
@@ -955,12 +958,15 @@ class __HomeContentState extends State<_HomeContent> {
             side: BorderSide(color: Colors.white.withOpacity(0.08)),
           ),
           contentPadding: EdgeInsets.all(28),
-          content: Container(
-            width: 320,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
+          content: Screenshot(
+            controller: screenshotController,
+            child: Container(
+              width: 320,
+              color: Color(0xFF0F172A), // Background color for the screenshot
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
@@ -1022,14 +1028,28 @@ class __HomeContentState extends State<_HomeContent> {
                   width: double.infinity,
                   height: 48,
                   child: ElevatedButton.icon(
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('🎉 Digital pass saved to local gallery successfully!'),
-                          backgroundColor: Colors.green,
-                        ),
-                      );
-                      Navigator.pop(context);
+                    onPressed: () async {
+                      try {
+                        final image = await screenshotController.capture();
+                        if (image != null) {
+                          await Gal.putImageBytes(image);
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('🎉 Digital pass saved to local gallery successfully!'),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+                            Navigator.pop(context);
+                          }
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Failed to save image: $e'), backgroundColor: Colors.red),
+                          );
+                        }
+                      }
                     },
                     icon: Icon(Icons.download, color: Colors.white),
                     label: Text(
@@ -1050,6 +1070,7 @@ class __HomeContentState extends State<_HomeContent> {
                 ),
               ],
             ),
+          ),
           ),
         );
       },
