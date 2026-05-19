@@ -100,7 +100,7 @@ class __HomeContentState extends State<_HomeContent> {
             style: GoogleFonts.outfit(
               fontSize: 22,
               fontWeight: FontWeight.bold,
-              color: Color(0xFFA78BFA),
+              color: Colors.white,
             ),
           ),
           actions: [

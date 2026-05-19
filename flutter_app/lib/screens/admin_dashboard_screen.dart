@@ -44,7 +44,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> with Single
         child: AppBar(
           backgroundColor: Color(0xFF1E293B).withOpacity(0.95),
           elevation: 0,
-          leadingWidth: 120,
+          leadingWidth: 70,
           leading: Padding(
             padding: const EdgeInsets.all(8.0),
             child: Image.asset('assets/b_logo.png', height: 40),
@@ -52,38 +52,34 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> with Single
           title: Text(
             'CITY PASS',
             style: GoogleFonts.outfit(
-              fontSize: 24,
+              fontSize: 22,
               fontWeight: FontWeight.bold,
-              color: Color(0xFFA78BFA),
+              color: Colors.white,
             ),
           ),
           actions: [
-            TextButton(onPressed: () {}, child: Text('Home', style: TextStyle(color: Colors.white))),
+            IconButton(
+              icon: Icon(Icons.home, color: Colors.white, size: 24),
+              tooltip: 'Home',
+              onPressed: () {
+                final passProv = Provider.of<PassProvider>(context, listen: false);
+                passProv.fetchAllPasses();
+                passProv.fetchUsers();
+                passProv.fetchAuditLogs();
+              },
+            ),
+            IconButton(
+              icon: Icon(Icons.logout, color: Colors.redAccent, size: 24),
+              tooltip: 'Logout',
+              onPressed: () {
+                Provider.of<AuthProvider>(context, listen: false).logout();
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (context) => LoginScreen()),
+                  (route) => false,
+                );
+              },
+            ),
             SizedBox(width: 8),
-            TextButton.icon(
-              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ScannerScreen())),
-              icon: Icon(Icons.qr_code_scanner, color: Colors.white, size: 20),
-              label: Text('Scanner', style: TextStyle(color: Colors.white)),
-            ),
-            SizedBox(width: 16),
-            Container(
-              margin: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-              child: ElevatedButton(
-                onPressed: () {
-                  Provider.of<AuthProvider>(context, listen: false).logout();
-                  Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(builder: (context) => LoginScreen()),
-                    (route) => false,
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.transparent,
-                  side: BorderSide(color: Colors.white24),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                ),
-                child: Text('Logout', style: TextStyle(color: Colors.white)),
-              ),
-            ),
           ],
         ),
       ),
