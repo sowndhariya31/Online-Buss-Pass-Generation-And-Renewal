@@ -620,15 +620,61 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> with Single
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              decoration: BoxDecoration(color: Color(0xFF1E293B), borderRadius: BorderRadius.circular(16)),
-              padding: EdgeInsets.all(8),
+              decoration: BoxDecoration(color: Color(0xFF1E293B), borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.white10)),
+              padding: EdgeInsets.all(12),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: Image.network(url, fit: BoxFit.contain),
+                child: Image.network(
+                  url, 
+                  fit: BoxFit.contain,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Container(
+                      height: 200,
+                      alignment: Alignment.center,
+                      child: CircularProgressIndicator(
+                        color: Color(0xFF6366F1),
+                        value: loadingProgress.expectedTotalBytes != null
+                            ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                            : null,
+                      ),
+                    );
+                  },
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      color: Color(0xFF0F172A),
+                      padding: EdgeInsets.all(24),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.broken_image, color: Colors.redAccent, size: 48),
+                          SizedBox(height: 16),
+                          Text(
+                            'Document Image Unavailable',
+                            style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            'The file may have been cleared from temporary storage (Render container restart) or is not accessible.\n\nURL: $url',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: Colors.white54, fontSize: 11, height: 1.4),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
             SizedBox(height: 16),
-            ElevatedButton(onPressed: () => Navigator.pop(context), child: Text('Close')),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context), 
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xFF6366F1),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              child: Text('Close'),
+            ),
           ],
         ),
       ),

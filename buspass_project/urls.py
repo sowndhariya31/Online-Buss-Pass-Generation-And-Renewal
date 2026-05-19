@@ -18,6 +18,5 @@ urlpatterns = [
     path('api/routes/', include('routes.api_urls')),
 ]
 
-if settings.DEBUG:
-
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# Unconditionally serve media files so they are visible in production (Render)
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
