@@ -19,6 +19,7 @@ class _ApplyPassScreenState extends State<ApplyPassScreen> {
   final _toController = TextEditingController();
   final _busNumberController = TextEditingController();
   
+  String _passType = 'STUDENT';
   XFile? _photo;
   XFile? _idProof;
   bool _isLoading = false;
@@ -115,12 +116,12 @@ class _ApplyPassScreenState extends State<ApplyPassScreen> {
     setState(() => _isLoading = true);
     try {
       final fields = {
-        'college_name': _collegeController.text,
+        'college_name': _passType == 'STUDENT' ? _collegeController.text : '',
         'address': _addressController.text,
-        'route_from': _fromController.text,
-        'route_to': _toController.text,
-        'bus_number': _busNumberController.text,
-        'pass_type': 'STUDENT',
+        'route_from': _passType == 'STUDENT' ? _fromController.text : '',
+        'route_to': _passType == 'STUDENT' ? _toController.text : '',
+        'bus_number': _passType == 'STUDENT' ? _busNumberController.text : '',
+        'pass_type': _passType,
       };
 
       final files = <String, http.MultipartFile>{};
@@ -197,15 +198,60 @@ class _ApplyPassScreenState extends State<ApplyPassScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Student Details', style: GoogleFonts.outfit(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
-                          SizedBox(height: 24),
-                          TextFormField(
-                            controller: _collegeController,
-                            style: TextStyle(color: Colors.white),
-                            decoration: _inputDecoration('College/School Name', Icons.school),
-                            validator: (v) => v!.isEmpty ? 'Required' : null,
+                          Text('Select Pass Type', style: GoogleFonts.outfit(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                          SizedBox(height: 12),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: InkWell(
+                                  onTap: () => setState(() => _passType = 'STUDENT'),
+                                  child: Container(
+                                    padding: EdgeInsets.symmetric(vertical: 12),
+                                    decoration: BoxDecoration(
+                                      color: _passType == 'STUDENT' ? Color(0xFF6366F1) : Colors.white10,
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(color: _passType == 'STUDENT' ? Color(0xFF6366F1) : Colors.white24),
+                                    ),
+                                    alignment: Alignment.center,
+                                    child: Text('Student Pass\n(₹280/mo)', textAlign: TextAlign.center, style: TextStyle(color: Colors.white, fontWeight: _passType == 'STUDENT' ? FontWeight.bold : FontWeight.normal)),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(width: 16),
+                              Expanded(
+                                child: InkWell(
+                                  onTap: () => setState(() => _passType = 'PUBLIC'),
+                                  child: Container(
+                                    padding: EdgeInsets.symmetric(vertical: 12),
+                                    decoration: BoxDecoration(
+                                      color: _passType == 'PUBLIC' ? Color(0xFF10B981) : Colors.white10,
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(color: _passType == 'PUBLIC' ? Color(0xFF10B981) : Colors.white24),
+                                    ),
+                                    alignment: Alignment.center,
+                                    child: Text('Public Pass\n(₹10000/mo)', textAlign: TextAlign.center, style: TextStyle(color: Colors.white, fontWeight: _passType == 'PUBLIC' ? FontWeight.bold : FontWeight.normal)),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                          SizedBox(height: 16),
+                          SizedBox(height: 24),
+                          Text(_passType == 'STUDENT' ? 'Student Details' : 'Public Pass Details', style: GoogleFonts.outfit(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+                          if (_passType == 'PUBLIC') ...[
+                            SizedBox(height: 8),
+                            Text('Public Passes allow unlimited rides on all routes.', style: TextStyle(color: Colors.white70, fontSize: 14)),
+                          ],
+                          SizedBox(height: 24),
+                          
+                          if (_passType == 'STUDENT') ...[
+                            TextFormField(
+                              controller: _collegeController,
+                              style: TextStyle(color: Colors.white),
+                              decoration: _inputDecoration('College/School Name', Icons.school),
+                              validator: (v) => v!.isEmpty ? 'Required' : null,
+                            ),
+                            SizedBox(height: 16),
+                          ],
                           TextFormField(
                             controller: _addressController,
                             style: TextStyle(color: Colors.white),
@@ -213,36 +259,38 @@ class _ApplyPassScreenState extends State<ApplyPassScreen> {
                             maxLines: 2,
                             validator: (v) => v!.isEmpty ? 'Required' : null,
                           ),
-                          SizedBox(height: 16),
-                          DropdownButtonFormField<String>(
-                            dropdownColor: Color(0xFF1E293B),
-                            style: TextStyle(color: Colors.white),
-                            decoration: _inputDecoration('From Stop', Icons.location_on),
-                            items: _validStops.map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
-                            onChanged: (val) => setState(() => _fromController.text = val!),
-                            validator: (v) => v == null ? 'Required' : null,
-                          ),
-                          SizedBox(height: 16),
-                           DropdownButtonFormField<String>(
-                            dropdownColor: Color(0xFF1E293B),
-                            style: TextStyle(color: Colors.white),
-                            decoration: _inputDecoration('To Stop', Icons.flag),
-                            items: _validStops.map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
-                            onChanged: (val) => setState(() => _toController.text = val!),
-                            validator: (v) => v == null ? 'Required' : null,
-                          ),
-                          SizedBox(height: 16),
-                          DropdownButtonFormField<String>(
-                            dropdownColor: Color(0xFF1E293B),
-                            style: TextStyle(color: Colors.white),
-                            decoration: _inputDecoration('Bus Number', Icons.directions_bus),
-                            items: _busNumbers.map((no) => DropdownMenuItem(value: no, child: Text("Bus $no"))).toList(),
-                            onChanged: (val) => setState(() => _busNumberController.text = val!),
-                            validator: (v) => v == null ? 'Required' : null,
-                          ),
-                          SizedBox(height: 24),
+                          if (_passType == 'STUDENT') ...[
+                            SizedBox(height: 16),
+                            DropdownButtonFormField<String>(
+                              dropdownColor: Color(0xFF1E293B),
+                              style: TextStyle(color: Colors.white),
+                              decoration: _inputDecoration('From Stop', Icons.location_on),
+                              items: _validStops.map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
+                              onChanged: (val) => setState(() => _fromController.text = val!),
+                              validator: (v) => v == null ? 'Required' : null,
+                            ),
+                            SizedBox(height: 16),
+                             DropdownButtonFormField<String>(
+                              dropdownColor: Color(0xFF1E293B),
+                              style: TextStyle(color: Colors.white),
+                              decoration: _inputDecoration('To Stop', Icons.flag),
+                              items: _validStops.map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
+                              onChanged: (val) => setState(() => _toController.text = val!),
+                              validator: (v) => v == null ? 'Required' : null,
+                            ),
+                            SizedBox(height: 16),
+                            DropdownButtonFormField<String>(
+                              dropdownColor: Color(0xFF1E293B),
+                              style: TextStyle(color: Colors.white),
+                              decoration: _inputDecoration('Bus Number', Icons.directions_bus),
+                              items: _busNumbers.map((no) => DropdownMenuItem(value: no, child: Text("Bus $no"))).toList(),
+                              onChanged: (val) => setState(() => _busNumberController.text = val!),
+                              validator: (v) => v == null ? 'Required' : null,
+                            ),
+                            SizedBox(height: 24),
+                          ],
                           
-                          _buildFilePicker('Student Photo', _photo, () => _pickImage(true)),
+                          _buildFilePicker(_passType == 'STUDENT' ? 'Student Photo' : 'Passenger Photo', _photo, () => _pickImage(true)),
                           SizedBox(height: 16),
                           _buildFilePicker('ID Proof (Aadhar/ID)', _idProof, () => _pickImage(false)),
                           

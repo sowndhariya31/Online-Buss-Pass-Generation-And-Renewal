@@ -203,7 +203,7 @@ class IDCardScreen extends StatelessWidget {
                                     ),
                                     SizedBox(height: 3),
                                     Text(
-                                      pass.collegeName ?? user?.college ?? 'Dr.Mgr College',
+                                      (pass.passType == 'PUBLIC') ? 'General Public' : (pass.collegeName ?? user?.college ?? 'Dr.Mgr College'),
                                       style: GoogleFonts.outfit(
                                         color: Colors.white60,
                                         fontSize: 12,
@@ -297,7 +297,7 @@ class IDCardScreen extends StatelessWidget {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     _buildFooterDetail('ISSUE DATE', _formatDate(pass.issueDate)),
-                                    _buildFooterDetail('ROUTE', '${pass.routeFrom ?? 'Ecr'} - ${pass.routeTo ?? 'Adyar'}'),
+                                    _buildFooterDetail('ROUTE', pass.passType == 'PUBLIC' ? 'All Routes' : '${pass.routeFrom ?? 'Ecr'} - ${pass.routeTo ?? 'Adyar'}'),
                                     _buildFooterDetail('STATUS', pass.status, isStatus: true),
                                   ],
                                 ),

@@ -683,13 +683,13 @@ class __HomeContentState extends State<_HomeContent> {
                                       Text('CITY PASS TRANSIT', style: GoogleFonts.outfit(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold)),
                                     ],
                                   ),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: [
-                                      Text('AMOUNT DUE', style: TextStyle(color: Colors.white38, fontSize: 10, letterSpacing: 1.2)),
-                                      Text('₹280.00', style: GoogleFonts.outfit(color: Colors.greenAccent, fontSize: 22, fontWeight: FontWeight.bold)),
-                                    ],
-                                  ),
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.end,
+                                        children: [
+                                          Text('AMOUNT DUE', style: TextStyle(color: Colors.white38, fontSize: 10, letterSpacing: 1.2)),
+                                          Text(p.passType == 'PUBLIC' ? '₹10000.00' : '₹280.00', style: GoogleFonts.outfit(color: Colors.greenAccent, fontSize: 22, fontWeight: FontWeight.bold)),
+                                        ],
+                                      ),
                                 ],
                               ),
                               Divider(color: Colors.white12, height: 32),

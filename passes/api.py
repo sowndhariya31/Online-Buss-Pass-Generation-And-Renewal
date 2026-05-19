@@ -267,7 +267,7 @@ class InitiateRazorpayAPIView(APIView):
         is_monthly = request.data.get('is_monthly', False)
         selected_month = (request.data.get('month') or '').upper()
         
-        amount_rupees = 280 if main_pass.pass_type == 'STUDENT' else 1000
+        amount_rupees = 280 if main_pass.pass_type == 'STUDENT' else 10000
         amount_paise = amount_rupees * 100
         currency = 'INR'
         
