@@ -22,11 +22,24 @@
         </div>
         
         <div class="flex-column gap-1">
-            <a href="{% url 'dashboard' %}" class="btn btn-primary" style="width: 100%;">Return to Dashboard</a>
-            <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 1rem;">
+            <button class="btn btn-primary" onclick="closeWindow();" style="width: 100%; padding: 14px; border-radius: 12px; font-weight: 600; cursor: pointer; background: #e53e3e; color: white; border: none; font-size: 1.1rem; box-shadow: 0 4px 12px rgba(229, 62, 62, 0.3);">
+                Close This Tab & Return to App
+            </button>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 1.5rem;">
                 If you were charged but the payment shows as failed, please contact support with your transaction details.
             </p>
         </div>
+
+        <script>
+            function closeWindow() {
+                window.close();
+                window.open('', '_self', '');
+                window.close();
+                setTimeout(function() {
+                    alert("Please manually close this browser tab/window and return to your CITY PASS App to try again!");
+                }, 300);
+            }
+        </script>
     </div>
 </div>
 {% endblock %}

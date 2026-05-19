@@ -22,14 +22,37 @@
             </div>
         </div>
         
-        <p style="margin-bottom: 2rem; line-height: 1.6;">
-            Your bus pass is now active. You can download your digital ID card from the dashboard.
+        <p style="margin-bottom: 1.5rem; line-height: 1.6;">
+            Your bus pass is now active! You can now close this browser tab and return to the app.
         </p>
+
+        <div style="background: rgba(72, 187, 120, 0.08); border: 1px dashed rgba(72, 187, 120, 0.3); border-radius: 12px; padding: 1.2rem; font-size: 0.95rem; margin-bottom: 2rem; text-align: center; color: #48bb78; line-height: 1.5;">
+            <span class="material-icons" style="font-size: 1.5rem; vertical-align: middle; margin-right: 0.5rem;">info</span>
+            <strong>Next Step:</strong> Simply close this tab manually if it doesn't close, then open your <strong>CITY PASS App</strong> to view your updated pass!
+        </div>
         
         <div class="flex-column gap-1">
-            <a href="{% url 'dashboard' %}" class="btn btn-primary" style="width: 100%;">Go to Dashboard</a>
-            <button class="btn btn-secondary" onclick="window.close();" style="width: 100%; margin-top: 0.5rem; background: rgba(255,255,255,0.08); border: 1px solid var(--glass-border); color: white; padding: 12px; border-radius: 12px; font-weight: 600; cursor: pointer; transition: background 0.2s;">Close This Tab & Return to App</button>
+            <button class="btn btn-primary" onclick="closeWindow();" style="width: 100%; padding: 14px; border-radius: 12px; font-weight: 600; cursor: pointer; background: var(--primary); color: white; border: none; font-size: 1.1rem; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);">
+                Close This Tab & Return to App
+            </button>
         </div>
+
+        <script>
+            function closeWindow() {
+                // Try multiple closing methods
+                window.close();
+                window.open('', '_self', '');
+                window.close();
+                
+                // Fallback alert for mobile browsers that restrict programmatic closing
+                setTimeout(function() {
+                    alert("Please manually close this browser tab/window and return to your CITY PASS App!");
+                }, 300);
+            }
+
+            // Auto-attempt to close after 5 seconds to make it completely seamless
+            setTimeout(closeWindow, 5000);
+        </script>
     </div>
 </div>
 {% endblock %}
