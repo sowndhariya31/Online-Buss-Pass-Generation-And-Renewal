@@ -130,205 +130,222 @@ class _ScannerScreenState extends State<ScannerScreen> {
             ),
           ),
           SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(32.0),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // LEFT: Live QR Scanner
-                  Expanded(
-                    flex: 5,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.black,
-                        borderRadius: BorderRadius.circular(24),
-                        border: Border.all(color: Color(0xFF6366F1).withOpacity(0.3), width: 2),
-                      ),
-                      clipBehavior: Clip.antiAlias,
-                      child: _scannerReady
-                          ? (kIsWeb 
-                              ? const HtmlElementView(viewType: 'qr-scanner-view')
-                              : (defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS)
-                                  ? MobileScanner(
-                                      onDetect: (capture) {
-                                        final List<Barcode> barcodes = capture.barcodes;
-                                        for (final barcode in barcodes) {
-                                          final String? code = barcode.rawValue;
-                                          if (code != null && !_isProcessing) {
-                                            _verifyPass(code);
-                                          }
-                                        }
-                                      },
-                                    )
-                                  : Center(
-                                      child: Text(
-                                        'QR Scanner is available on Web, Android, & iOS.\nPlease use manual entry on Desktop.',
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(color: Colors.white54, fontSize: 16),
-                                      ),
-                                    ))
-                          : Center(child: CircularProgressIndicator(color: Color(0xFF6366F1))),
-                    ),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final bool isMobile = constraints.maxWidth < 750;
+                
+                final scannerWidget = Container(
+                  height: isMobile ? 280 : double.infinity,
+                  decoration: BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(color: Color(0xFF6366F1).withOpacity(0.3), width: 2),
                   ),
-                  SizedBox(width: 32),
-                  // RIGHT: Manual Input & Results
-                  Expanded(
-                    flex: 4,
-                    child: SingleChildScrollView(
+                  clipBehavior: Clip.antiAlias,
+                  child: _scannerReady
+                      ? (kIsWeb 
+                          ? const HtmlElementView(viewType: 'qr-scanner-view')
+                          : (defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS)
+                              ? MobileScanner(
+                                  onDetect: (capture) {
+                                    final List<Barcode> barcodes = capture.barcodes;
+                                    for (final barcode in barcodes) {
+                                      final String? code = barcode.rawValue;
+                                      if (code != null && !_isProcessing) {
+                                        _verifyPass(code);
+                                      }
+                                    }
+                                  },
+                                )
+                              : Center(
+                                  child: Text(
+                                    'QR Scanner is available on Web, Android, & iOS.\nPlease use manual entry on Desktop.',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(color: Colors.white54, fontSize: 16),
+                                  ),
+                                ))
+                      : Center(child: CircularProgressIndicator(color: Color(0xFF6366F1))),
+                );
+
+                final manualEntryWidget = Column(
+                  children: [
+                    // Manual Input Card
+                    Container(
+                      padding: EdgeInsets.all(32),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.4),
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(color: Colors.white10),
+                      ),
                       child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Manual Input Card
-                          Container(
-                            padding: EdgeInsets.all(32),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.4),
-                              borderRadius: BorderRadius.circular(24),
-                              border: Border.all(color: Colors.white10),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Icon(Icons.keyboard, color: Color(0xFF6366F1), size: 24),
-                                    SizedBox(width: 12),
-                                    Text('Manual Entry', style: GoogleFonts.outfit(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
-                                  ],
-                                ),
-                                SizedBox(height: 8),
-                                Text('Type a Pass ID to verify manually', style: TextStyle(color: Colors.white54, fontSize: 13)),
-                                SizedBox(height: 20),
-                                TextField(
-                                  controller: _passIdController,
-                                  onSubmitted: (value) => _verifyPass(value.trim().toUpperCase()),
-                                  decoration: InputDecoration(
-                                    hintText: 'e.g. MTC2026-000001',
-                                    hintStyle: TextStyle(color: Colors.white24, fontSize: 14),
-                                    filled: true,
-                                    fillColor: Colors.white.withOpacity(0.05),
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(16),
-                                      borderSide: BorderSide(color: Colors.white10),
-                                    ),
-                                    enabledBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(16),
-                                      borderSide: BorderSide(color: Colors.white10),
-                                    ),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(16),
-                                      borderSide: BorderSide(color: Color(0xFF6366F1)),
-                                    ),
-                                    prefixIcon: Icon(Icons.credit_card, color: Colors.white38),
-                                  ),
-                                  style: TextStyle(color: Colors.white, fontSize: 16),
-                                ),
-                                SizedBox(height: 16),
-                                SizedBox(
-                                  width: double.infinity,
-                                  height: 52,
-                                  child: ElevatedButton.icon(
-                                    onPressed: _isProcessing
-                                        ? null
-                                        : () => _verifyPass(_passIdController.text.trim().toUpperCase()),
-                                    icon: _isProcessing
-                                        ? SizedBox(width: 18, height: 18, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                                        : Icon(Icons.verified_user, color: Colors.white, size: 20),
-                                    label: Text(
-                                      _isProcessing ? 'Verifying...' : 'Verify Pass',
-                                      style: GoogleFonts.outfit(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white),
-                                    ),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Color(0xFF6366F1),
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                                      elevation: 0,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
+                          Row(
+                            children: [
+                              Icon(Icons.keyboard, color: Color(0xFF6366F1), size: 24),
+                              SizedBox(width: 12),
+                              Text('Manual Entry', style: GoogleFonts.outfit(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+                            ],
                           ),
-                          SizedBox(height: 24),
-                          // Last Result Card
-                          if (_lastSuccess != null)
-                            Container(
-                              width: double.infinity,
-                              padding: EdgeInsets.all(24),
-                              decoration: BoxDecoration(
-                                color: (_lastSuccess! ? Colors.green : Colors.red).withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(color: (_lastSuccess! ? Colors.green : Colors.red).withOpacity(0.3)),
+                          SizedBox(height: 8),
+                          Text('Type a Pass ID to verify manually', style: TextStyle(color: Colors.white54, fontSize: 13)),
+                          SizedBox(height: 20),
+                          TextField(
+                            controller: _passIdController,
+                            onSubmitted: (value) => _verifyPass(value.trim().toUpperCase()),
+                            decoration: InputDecoration(
+                              hintText: 'e.g. MTC2026-000001',
+                              hintStyle: TextStyle(color: Colors.white24, fontSize: 14),
+                              filled: true,
+                              fillColor: Colors.white.withOpacity(0.05),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: BorderSide(color: Colors.white10),
                               ),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    padding: EdgeInsets.all(12),
-                                    decoration: BoxDecoration(
-                                      color: (_lastSuccess! ? Colors.green : Colors.red).withOpacity(0.15),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Icon(
-                                      _lastSuccess! ? Icons.check_circle : Icons.cancel,
-                                      color: _lastSuccess! ? Colors.greenAccent : Colors.redAccent,
-                                      size: 32,
-                                    ),
-                                  ),
-                                  SizedBox(width: 16),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          _lastSuccess! ? 'PASS VALID' : 'PASS INVALID',
-                                          style: GoogleFonts.outfit(
-                                            color: _lastSuccess! ? Colors.greenAccent : Colors.redAccent,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 18,
-                                          ),
-                                        ),
-                                        if (_lastResult != null) ...[
-                                          SizedBox(height: 4),
-                                          Text(
-                                            '${_lastResult!['user_email']}',
-                                            style: TextStyle(color: Colors.white70, fontSize: 13),
-                                          ),
-                                          Text(
-                                            'Status: ${_lastResult!['status']}',
-                                            style: TextStyle(color: Colors.white54, fontSize: 12),
-                                          ),
-                                        ],
-                                      ],
-                                    ),
-                                  ),
-                                ],
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: BorderSide(color: Colors.white10),
                               ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: BorderSide(color: Color(0xFF6366F1)),
+                              ),
+                              prefixIcon: Icon(Icons.credit_card, color: Colors.white38),
                             ),
-                          SizedBox(height: 24),
-                          // Info Card
-                          Container(
+                            style: TextStyle(color: Colors.white, fontSize: 16),
+                          ),
+                          SizedBox(height: 16),
+                          SizedBox(
                             width: double.infinity,
-                            padding: EdgeInsets.all(20),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.03),
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: Colors.white.withOpacity(0.05)),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('How to Scan', style: GoogleFonts.outfit(color: Colors.white70, fontWeight: FontWeight.bold, fontSize: 14)),
-                                SizedBox(height: 8),
-                                _infoRow(Icons.qr_code_scanner, 'Hold the QR code in front of the camera'),
-                                _infoRow(Icons.keyboard, 'Or type the Pass ID manually'),
-                                _infoRow(Icons.check, 'Valid passes will show green confirmation'),
-                              ],
+                            height: 52,
+                            child: ElevatedButton.icon(
+                              onPressed: _isProcessing
+                                  ? null
+                                  : () => _verifyPass(_passIdController.text.trim().toUpperCase()),
+                              icon: _isProcessing
+                                  ? SizedBox(width: 18, height: 18, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                                  : Icon(Icons.verified_user, color: Colors.white, size: 20),
+                              label: Text(
+                                _isProcessing ? 'Verifying...' : 'Verify Pass',
+                                style: GoogleFonts.outfit(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Color(0xFF6366F1),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                                elevation: 0,
+                              ),
                             ),
                           ),
                         ],
                       ),
                     ),
-                  ),
-                ],
-              ),
+                    SizedBox(height: 24),
+                    // Last Result Card
+                    if (_lastSuccess != null)
+                      Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          color: (_lastSuccess! ? Colors.green : Colors.red).withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: (_lastSuccess! ? Colors.green : Colors.red).withOpacity(0.3)),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: (_lastSuccess! ? Colors.green : Colors.red).withOpacity(0.15),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                _lastSuccess! ? Icons.check_circle : Icons.cancel,
+                                color: _lastSuccess! ? Colors.greenAccent : Colors.redAccent,
+                                size: 32,
+                              ),
+                            ),
+                            SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    _lastSuccess! ? 'PASS VALID' : 'PASS INVALID',
+                                    style: GoogleFonts.outfit(
+                                      color: _lastSuccess! ? Colors.greenAccent : Colors.redAccent,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18,
+                                    ),
+                                  ),
+                                  if (_lastResult != null) ...[
+                                    SizedBox(height: 4),
+                                    Text(
+                                      '${_lastResult!['user_email']}',
+                                      style: TextStyle(color: Colors.white70, fontSize: 13),
+                                    ),
+                                    Text(
+                                      'Status: ${_lastResult!['status']}',
+                                      style: TextStyle(color: Colors.white54, fontSize: 12),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    SizedBox(height: 24),
+                    // Info Card
+                    Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.03),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: Colors.white.withOpacity(0.05)),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('How to Scan', style: GoogleFonts.outfit(color: Colors.white70, fontWeight: FontWeight.bold, fontSize: 14)),
+                          SizedBox(height: 8),
+                          _infoRow(Icons.qr_code_scanner, 'Hold the QR code in front of the camera'),
+                          _infoRow(Icons.keyboard, 'Or type the Pass ID manually'),
+                          _infoRow(Icons.check, 'Valid passes will show green confirmation'),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+
+                if (isMobile) {
+                  return SingleChildScrollView(
+                    physics: BouncingScrollPhysics(),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
+                      child: Column(
+                        children: [
+                          scannerWidget,
+                          SizedBox(height: 24),
+                          manualEntryWidget,
+                        ],
+                      ),
+                    ),
+                  );
+                } else {
+                  return Padding(
+                    padding: const EdgeInsets.all(32.0),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(flex: 5, child: scannerWidget),
+                        SizedBox(width: 32),
+                        Expanded(flex: 4, child: SingleChildScrollView(child: manualEntryWidget)),
+                      ],
+                    ),
+                  );
+                }
+              },
             ),
           ),
         ],

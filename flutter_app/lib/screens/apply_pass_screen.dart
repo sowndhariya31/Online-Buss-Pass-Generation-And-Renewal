@@ -17,11 +17,16 @@ class _ApplyPassScreenState extends State<ApplyPassScreen> {
   final _addressController = TextEditingController();
   final _fromController = TextEditingController();
   final _toController = TextEditingController();
+  final _busNumberController = TextEditingController();
   
   XFile? _photo;
   XFile? _idProof;
   bool _isLoading = false;
   final ImagePicker _picker = ImagePicker();
+
+  final List<String> _busNumbers = [
+    "78", "21G", "29C", "47A", "588", "6D", "T29", "A1", "99", "91V", "109", "109CT", "109T", "109X", "102K", "102P"
+  ];
 
   final List<String> _validStops = [
     "KOYAMBEDU", "THIRUVANMIYUR", "ISLAND GROUND", "KILAMBAKKAM", "PERAMBUR", "BESANT NAGAR",
@@ -114,6 +119,7 @@ class _ApplyPassScreenState extends State<ApplyPassScreen> {
         'address': _addressController.text,
         'route_from': _fromController.text,
         'route_to': _toController.text,
+        'bus_number': _busNumberController.text,
         'pass_type': 'STUDENT',
       };
 
@@ -217,12 +223,21 @@ class _ApplyPassScreenState extends State<ApplyPassScreen> {
                             validator: (v) => v == null ? 'Required' : null,
                           ),
                           SizedBox(height: 16),
-                          DropdownButtonFormField<String>(
+                           DropdownButtonFormField<String>(
                             dropdownColor: Color(0xFF1E293B),
                             style: TextStyle(color: Colors.white),
                             decoration: _inputDecoration('To Stop', Icons.flag),
                             items: _validStops.map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
                             onChanged: (val) => setState(() => _toController.text = val!),
+                            validator: (v) => v == null ? 'Required' : null,
+                          ),
+                          SizedBox(height: 16),
+                          DropdownButtonFormField<String>(
+                            dropdownColor: Color(0xFF1E293B),
+                            style: TextStyle(color: Colors.white),
+                            decoration: _inputDecoration('Bus Number', Icons.directions_bus),
+                            items: _busNumbers.map((no) => DropdownMenuItem(value: no, child: Text("Bus $no"))).toList(),
+                            onChanged: (val) => setState(() => _busNumberController.text = val!),
                             validator: (v) => v == null ? 'Required' : null,
                           ),
                           SizedBox(height: 24),

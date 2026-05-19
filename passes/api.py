@@ -32,6 +32,7 @@ class ApplyPassAPIView(generics.CreateAPIView):
         user.address = self.request.data.get('address', user.address)
         user.route_from = self.request.data.get('route_from', user.route_from)
         user.route_to = self.request.data.get('route_to', user.route_to)
+        user.bus_number = self.request.data.get('bus_number', user.bus_number)
         
         if 'photo' in self.request.FILES:
             user.photo = self.request.FILES['photo']
@@ -145,25 +146,25 @@ class VerifyPassAPIView(generics.RetrieveAPIView):
             return renewal.main_pass
         return get_object_or_404(MainPass, main_pass_id=pass_id)
 
-    # Route data matching find_route.html
-    BUS_ROUTES = {
-        "78": ["KOYAMBEDU", "THIRUVANMIYUR"],
-        "21G": ["ISLAND GROUND", "KILAMBAKKAM"],
-        "29C": ["PERAMBUR", "BESANT NAGAR"],
-        "47A": ["VILLIVAKKAM", "THIRUVANMIYUR"],
-        "588": ["THIRUVANMIYUR", "MAMALLAPURAM"],
-        "6D": ["TOLLGATE", "THIRUVANMIYUR"],
-        "T29": ["THIRU.VI.KA.NAGAR", "THIRUVANMIYUR"],
-        "A1": ["M.G.R.CENTRAL", "THIRUVANMIYUR"],
-        "99": ["TAMBARAM WEST", "ADYAR B.S."],
-        "91V": ["GUDUVANCHERY", "THIRUVANMIYUR"],
-        "109": ["ISLAND GROUND", "KOVALAM"],
-        "109CT": ["ADYAR B.S.", "KOVALAM"],
-        "109T": ["THIRUVOTRIYUR", "KOVALAM"],
-        "109X": ["ISLAND GROUND", "THIRUPORUR"],
-        "102K": ["ISLAND GROUND", "KANNAGI NAGAR"],
-        "102P": ["ISLAND GROUND", "PERUMPAKKAM"]
-    }
+    # Predefined bus routes matching find_route.html stops exactly
+    BUS_ROUTES = [
+        { "no": "78", "start": "KOYAMBEDU", "end": "THIRUVANMIYUR", "stops": ["M.M.D.A.COLONY", "JAFFARKHAN PET", "CIPET", "GUINDY", "ENG.COLLEGE", "ADYAR B.S.", "ADYAR DEPOT"] },
+        { "no": "21G", "start": "ISLAND GROUND", "end": "KILAMBAKKAM", "stops": ["SECRETARIAT", "CHEPAUK", "Q.M.C", "MANDAVELI", "ADYAR GATE", "KOTTURPURAM", "GUINDY", "PALLAVARAM", "TAMBARAM", "VANDALUR ZOO"] },
+        { "no": "29C", "start": "PERAMBUR", "end": "BESANT NAGAR", "stops": ["SHIVASHANMUGAPURAM", "K.M.C", "STERLING RD", "PONDY BAZAAR", "SAIDAPET", "ENG.COLLEGE", "ADYAR B.S."] },
+        { "no": "47A", "start": "VILLIVAKKAM", "end": "THIRUVANMIYUR", "stops": ["KILPAUK GARDEN", "TAYLORS ROAD", "PONDY BAZAAR", "SAIDAPET", "ENG.COLLEGE", "ADYAR B.S."] },
+        { "no": "588", "start": "THIRUVANMIYUR", "end": "MAMALLAPURAM", "stops": ["KOTTIVAKKAM", "PALAVAKKAM", "NEELANKARAI", "VETTUVANKENI", "V.G.P", "PANAIYUR", "MUTTUKKADU", "KOVALAM"] },
+        { "no": "6D", "start": "TOLLGATE", "end": "THIRUVANMIYUR", "stops": ["PERAMBUR", "EGMORE", "ANNA ROAD", "MANDAVELI", "ADYAR DEPOT"] },
+        { "no": "T29", "start": "THIRU.VI.KA.NAGAR", "end": "THIRUVANMIYUR", "stops": ["M.G.R.CENTRAL", "WESLEY H.S", "Y.M.I.A", "MANDAVELI", "ADYAR DEPOT"] },
+        { "no": "A1", "start": "M.G.R.CENTRAL", "end": "THIRUVANMIYUR", "stops": ["TAMBARAM WEST", "CHROMEPET", "PALLAVARAM", "V.G.P", "NEELANKARAI", "KOTTIVAKKAM"] },
+        { "no": "99", "start": "TAMBARAM WEST", "end": "ADYAR B.S.", "stops": ["GUDUVANCHERY", "VANDALUR ZOO", "TAMBARAM", "CHROMEPET", "KANDANCHAVADI", "THIRUVANMIYUR"] },
+        { "no": "91V", "start": "GUDUVANCHERY", "end": "THIRUVANMIYUR", "stops": ["ISLAND GROUND", "CHEPAUK", "Q.M.C", "FORESHORE ESTATE", "ADYAR DEPOT", "KOVALAM"] },
+        { "no": "109", "start": "ISLAND GROUND", "end": "KOVALAM", "stops": ["ADYAR B.S.", "THIRUVANMIYUR", "PALAVAKKAM", "NEELANKARAI", "V.G.P", "PANAIYUR", "MUTTUKKADU"] },
+        { "no": "109CT", "start": "ADYAR B.S.", "end": "KOVALAM", "stops": ["THIRUVOTRIYUR", "EGMORE", "SECRETARIAT", "CHEPAUK", "FORESHORE ESTATE", "ADYAR DEPOT", "THIRUVANMIYUR"] },
+        { "no": "109T", "start": "THIRUVOTRIYUR", "end": "KOVALAM", "stops": ["ISLAND GROUND", "CHEPAUK", "Q.M.C", "FORESHORE ESTATE", "THIRUVANMIYUR", "THIRUPORUR"] },
+        { "no": "109X", "start": "ISLAND GROUND", "end": "THIRUPORUR", "stops": ["ADYAR DEPOT", "SRP TOOLS", "THORAPAKKAM", "SHOLINGANALLUR", "PERUMBAKKAM", "KANNAGI NAGAR"] },
+        { "no": "102K", "start": "ISLAND GROUND", "end": "KANNAGI NAGAR", "stops": ["CHEPAUK", "Q.M.C", "ADYAR DEPOT", "THORAPAKKAM", "KARAPAKKAM", "SHOLINGANALLUR"] },
+        { "no": "102P", "start": "ISLAND GROUND", "end": "PERUMPAKKAM", "stops": ["CHEPAUK", "Q.M.C", "ADYAR DEPOT", "THORAPAKKAM", "KARAPAKKAM", "SHOLINGANALLUR"] }
+    ]
 
     def get(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -194,15 +195,24 @@ class VerifyPassAPIView(generics.RetrieveAPIView):
         if instance.pass_type == 'STUDENT' and conductor.role == 'CONDUCTOR':
             student = instance.user
             bus_no = (conductor.bus_number or "").strip().upper()
+            student_bus = (student.bus_number or "").strip().upper()
             student_from = (student.route_from or "").strip().upper()
             student_to = (student.route_to or "").strip().upper()
             
-            allowed_route = self.BUS_ROUTES.get(bus_no)
-            if allowed_route:
-                # Check if the student's route (from/to) matches this bus's route (start/end)
-                if student_from not in allowed_route or student_to not in allowed_route:
+            # 1. Bus Number Mismatch Check
+            if student_bus and student_bus != bus_no:
+                return Response({
+                    'error': f'Bus Mismatch! Your pass is only valid for Bus {student_bus}, but scanned on Bus {bus_no}.',
+                    'pass_type': 'STUDENT'
+                }, status=400)
+            
+            # 2. Stops validation
+            bus_route = next((r for r in self.BUS_ROUTES if r['no'].upper() == bus_no), None)
+            if bus_route:
+                all_stops = [bus_route['start'].upper().strip()] + [s.upper().strip() for s in bus_route['stops']] + [bus_route['end'].upper().strip()]
+                if student_from not in all_stops or student_to not in all_stops:
                     return Response({
-                        'error': f'Route Mismatch! Bus {bus_no} does not serve {student_from} ⇌ {student_to}.',
+                        'error': f'Route Mismatch! Bus {bus_no} does not serve stops: {student_from} ⇌ {student_to}.',
                         'pass_type': 'STUDENT'
                     }, status=400)
             else:
