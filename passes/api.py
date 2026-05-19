@@ -199,13 +199,7 @@ class VerifyPassAPIView(generics.RetrieveAPIView):
             student_from = (student.route_from or "").strip().upper()
             student_to = (student.route_to or "").strip().upper()
             
-            # 1. Bus Number Mismatch Check
-            if student_bus and student_bus != bus_no:
-                return Response({
-                    'error': f'Bus Mismatch! Your pass is only valid for Bus {student_bus}, but scanned on Bus {bus_no}.',
-                    'pass_type': 'STUDENT'
-                }, status=400)
-            
+
             # 2. Stops validation
             bus_route = next((r for r in self.BUS_ROUTES if r['no'].upper() == bus_no), None)
             if bus_route:

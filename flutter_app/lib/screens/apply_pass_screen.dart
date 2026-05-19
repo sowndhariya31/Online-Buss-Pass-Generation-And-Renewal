@@ -278,15 +278,6 @@ class _ApplyPassScreenState extends State<ApplyPassScreen> {
                               onChanged: (val) => setState(() => _toController.text = val!),
                               validator: (v) => v == null ? 'Required' : null,
                             ),
-                            SizedBox(height: 16),
-                            DropdownButtonFormField<String>(
-                              dropdownColor: Color(0xFF1E293B),
-                              style: TextStyle(color: Colors.white),
-                              decoration: _inputDecoration('Bus Number', Icons.directions_bus),
-                              items: _busNumbers.map((no) => DropdownMenuItem(value: no, child: Text("Bus $no"))).toList(),
-                              onChanged: (val) => setState(() => _busNumberController.text = val!),
-                              validator: (v) => v == null ? 'Required' : null,
-                            ),
                             SizedBox(height: 24),
                           ],
                           
