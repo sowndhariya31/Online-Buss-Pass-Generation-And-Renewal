@@ -457,28 +457,32 @@ input[type="file"] {
 /* Mobile Adjustments (Phones) */
 @media (max-width: 768px) {
     .nav-logo {
-        height: 45px !important;
-        width: 45px !important;
+        height: 38px !important;
+        width: 40px !important;
     }
 
     .glass-nav {
-        padding: 0.8rem 1.5rem;
+        padding: 0.6rem 0.8rem;
         flex-direction: row; 
         justify-content: flex-start;
         align-items: center;
-        gap: 0.8rem;
+        gap: 0.5rem;
+    }
+
+    .nav-brand .brand-text {
+        font-size: 1.15rem !important;
     }
 
     .nav-links {
         display: flex;
-        gap: 1rem;
+        gap: 0.8rem;
         justify-content: flex-end;
     }
 
     .nav-links a {
-        margin-left: 0.5rem;
+        margin-left: 0.4rem;
         margin-right: 0;
-        font-size: 0.85rem;
+        font-size: 0.8rem;
     }
 
     .container {
@@ -551,11 +555,16 @@ input[type="file"] {
 /* Extra Small Devices */
 @media (max-width: 480px) {
     .nav-logo {
-        height: 38px !important;
-        width: 38px !important;
+        height: 32px !important;
+        width: 34px !important;
     }
     
-    .brand-text {
-        font-size: 1.25rem !important;
+    .nav-brand .brand-text {
+        font-size: 0.95rem !important;
+    }
+
+    .glass-nav {
+        padding: 0.5rem 0.5rem;
+        gap: 0.3rem;
     }
 }
