@@ -998,7 +998,7 @@ class __HomeContentState extends State<_HomeContent> {
                     ],
                   ),
                   child: QrImageView(
-                    data: p.passId.isEmpty ? 'TEMP-${p.id}' : p.passId,
+                    data: p.activeRenewalId ?? (p.passId.isEmpty ? 'TEMP-${p.id}' : p.passId),
                     version: QrVersions.auto,
                     size: 200.0,
                     gapless: false,
@@ -1006,7 +1006,7 @@ class __HomeContentState extends State<_HomeContent> {
                 ),
                 SizedBox(height: 24),
                 Text(
-                  p.passId.isEmpty ? 'TEMPORARY PASS ID' : p.passId,
+                  (p.activeRenewalId ?? (p.passId.isEmpty ? 'TEMPORARY PASS ID' : p.passId)),
                   style: GoogleFonts.outfit(
                     color: Color(0xFF10B981),
                     fontSize: 18,

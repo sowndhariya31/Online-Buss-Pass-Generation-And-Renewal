@@ -54,10 +54,17 @@ class _ScannerScreenState extends State<ScannerScreen> {
           _lastSuccess = true;
           _lastResult = data;
         });
+        final String routeInfo = data['pass_type'] == 'STUDENT'
+            ? '\nRoute: ${data['route_from'] ?? 'N/A'} ⇌ ${data['route_to'] ?? 'N/A'}'
+            : '\nRoute: All Routes (General Public)';
+        final int dailyTrips = data['daily_trip_count'] ?? 0;
+        final String dailyTripsInfo = data['pass_type'] == 'STUDENT'
+            ? '\nDaily Trips Used: $dailyTrips/2'
+            : '\nDaily Trips Used: $dailyTrips (Unlimited)';
         _showResultDialog(
           true,
           'Pass Valid ✓',
-          'ID: $passId\nUser: ${data['user_email']}\nStatus: ${data['status']}',
+          'ID: $passId\nUser: ${data['username'] ?? data['user_email']}$routeInfo$dailyTripsInfo\nStatus: ${data['status']}',
         );
       } else {
         setState(() => _lastSuccess = false);
