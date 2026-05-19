@@ -18,5 +18,10 @@ urlpatterns = [
     path('api/routes/', include('routes.api_urls')),
 ]
 
+from django.urls import re_path
+from django.views.static import serve
+
 # Unconditionally serve media files so they are visible in production (Render)
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+urlpatterns += [
+    re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT, 'show_indexes': True}),
+]
