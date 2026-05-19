@@ -1,6 +1,6 @@
 import qrcode
 
-url = "https://online-buss-pass-generation-and-renewal.onrender.com/media/app-release.apk"
+url = "https://github.com/sowndhariya31/Online-Buss-Pass-Generation-And-Renewal/raw/main/static/app-release.apk"
 qr = qrcode.QRCode(
     version=1,
     error_correction=qrcode.constants.ERROR_CORRECT_L,
