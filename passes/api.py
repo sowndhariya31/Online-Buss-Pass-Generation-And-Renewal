@@ -84,7 +84,7 @@ class ConfirmPaymentAPIView(generics.UpdateAPIView):
         instance = self.get_object()
         today = timezone.now().date()
         current_month = today.strftime('%b').upper()
-        selected_month = request.data.get('month', current_month).upper()
+        selected_month = (request.data.get('month') or current_month).upper()
         
         if instance.payment_status != 'PAID':
             # 1. Initial Payment
@@ -255,7 +255,7 @@ class InitiateRazorpayAPIView(APIView):
         main_pass = get_object_or_404(MainPass, pk=pk, user=request.user)
         
         is_monthly = request.data.get('is_monthly', False)
-        selected_month = request.data.get('month', '').upper()
+        selected_month = (request.data.get('month') or '').upper()
         
         amount_rupees = 280 if main_pass.pass_type == 'STUDENT' else 1000
         amount_paise = amount_rupees * 100
