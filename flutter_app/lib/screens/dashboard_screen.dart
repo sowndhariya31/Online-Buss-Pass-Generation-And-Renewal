@@ -821,8 +821,19 @@ class __HomeContentState extends State<_HomeContent> {
                                          }
                                       } else {
                                         setState(() => processing = false);
+                                        String errMsg = 'Failed to initialize transaction.';
+                                        try {
+                                          final errData = json.decode(response.body);
+                                          if (errData['error'] != null) {
+                                            errMsg = errData['error'];
+                                          }
+                                        } catch (_) {}
                                         ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(content: Text('Failed to initialize transaction.')),
+                                          SnackBar(
+                                            content: Text('❌ $errMsg'),
+                                            backgroundColor: Colors.redAccent,
+                                            duration: Duration(seconds: 6),
+                                          ),
                                         );
                                       }
                                     } catch (e) {

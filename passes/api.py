@@ -262,12 +262,17 @@ class InitiateRazorpayAPIView(APIView):
         currency = 'INR'
         
         # Create Razorpay Order
-        razorpay_order = razorpay_client.order.create({
-            'amount': amount_paise,
-            'currency': currency,
-            'payment_capture': '1'
-        })
-        razorpay_order_id = razorpay_order['id']
+        try:
+            razorpay_order = razorpay_client.order.create({
+                'amount': amount_paise,
+                'currency': currency,
+                'payment_capture': '1'
+            })
+            razorpay_order_id = razorpay_order['id']
+        except Exception as e:
+            return Response({
+                'error': f'Razorpay Order Creation Failed: {str(e)}. Please check if RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET are configured properly in your server environment.'
+            }, status=status.HTTP_400_BAD_REQUEST)
         
         if is_monthly and selected_month:
             # Monthly Renewal payment order
