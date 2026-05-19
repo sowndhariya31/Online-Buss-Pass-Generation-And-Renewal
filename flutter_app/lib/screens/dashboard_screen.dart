@@ -914,7 +914,7 @@ class __HomeContentState extends State<_HomeContent> {
                 ),
                 SizedBox(height: 12),
                 Text(
-                  'We have opened a secure Razorpay checkout page in your web browser.\n\n1. Complete the payment in the browser tab.\n2. Once done, return here and tap the refresh icon at the top of the dashboard to view your active card!',
+                  'We have opened a secure Razorpay checkout page in your default web browser.\n\n1. Complete the payment in the browser tab.\n2. Once done, return here and tap the Home icon at the top (or pull down the screen to refresh) to view your active pass!',
                   textAlign: TextAlign.center,
                   style: TextStyle(color: Colors.white70, fontSize: 13, height: 1.5),
                 ),
